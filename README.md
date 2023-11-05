@@ -1,13 +1,9 @@
-# fetcher
+# Broadcaster
 
-A QNX process for fetching data from sensors over I2C.
+A QNX process for broadcasting data over an RN2483 LoRa radio module using a UART connection.
 
-**NOTE:** This program is currently in a dummy format: it is being used to read data from a file and repeat it over
-stdin. This is used for testing [packager][packager].
+**NOTE:** This program is currently in a dummy format.
 
 ## Usage
 
-See the help documentation with the command: `use fetcher`
-
-<!--- Links --->
-[packager]: https://github.com/CarletonURocketry/packager 
+See the help documentation with the command: `use broadcaster`

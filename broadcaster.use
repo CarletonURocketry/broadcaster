@@ -6,7 +6,7 @@ are welcome to redistribute it under certain conditions. Please see the GNUGPLv3
 license for more details: https://www.gnu.org/licenses/
 
 DESCRIPTION:
-    A command line utility for broadcasting hexadecimal data over LoRa radio using UART.
+    A command line utility for broadcasting data over an RN2483 LoRa radio module using UART.
 
 SYNTAX:
     broadcaster
