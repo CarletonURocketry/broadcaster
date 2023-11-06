@@ -1,5 +1,13 @@
-#ifndef _RADIO_H
-#define _RADIO_H
+/**
+ * @file radio.h
+ * @brief This file contains the types necessary for the LoRa radio parameters, as well as function prototypes for all
+ * functions found in radio.c.
+ *
+ * Parameters that have limited string options are encoded as enums. The LoRa radio parameters are represented as a
+ * struct to have one collection of all the required parameters.
+ */
+#ifndef _RADIO_H_
+#define _RADIO_H_
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -7,22 +15,16 @@
 
 /** Represents the possible choices for modulation. */
 typedef enum {
-    /** Lora modulation. */
-    LORA,
-    /** FSK modulation. */
-    FSK
+    LORA, /**< Lora modulation. */
+    FSK,  /**< FSK modulation. */
 } Modulation;
 
 /** Represents the possible choices for coding rate. */
 typedef enum {
-    /** 4/5 */
-    CR_4_5,
-    /** 4/6 */
-    CR_4_6,
-    /** 4/7 */
-    CR_4_7,
-    /** 4/8 */
-    CR_4_8,
+    CR_4_5, /**< 4/5 */
+    CR_4_6, /**< 4/6 */
+    CR_4_7, /**< 4/7 */
+    CR_4_8, /**< 4/8 */
 } CodingRate;
 
 /** Contains the parameters for the RN2483 LoRa radio module. */
@@ -64,4 +66,4 @@ void radio_setup_tty(struct termios *tty);
 bool radio_set_params(int radio_fd, const struct lora_params_t *params);
 bool wait_for_ok(int radio_fd);
 
-#endif // _RADIO_H
+#endif // _RADIO_H_
