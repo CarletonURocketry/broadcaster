@@ -64,7 +64,9 @@ bool radio_validate_mod(const char *mod, struct lora_params_t *params) {
 bool radio_validate_freq(const char *freq, struct lora_params_t *params) {
     char *end;
     uint32_t p_freq = strtoul(freq, &end, 10);
-    if (!(LL_FREQ <= p_freq && p_freq <= LH_FREQ) && !(HL_FREQ <= p_freq <= HH_FREQ)) return false;
+    if (errno || freq == end) return false; // Call failed
+
+    if (!(LL_FREQ <= p_freq && p_freq <= LH_FREQ) && !(HL_FREQ <= p_freq && p_freq <= HH_FREQ)) return false;
 
     params->frequency = p_freq;
     return true;
@@ -94,6 +96,8 @@ bool radio_validate_pwr(const char *power, struct lora_params_t *params) {
 bool radio_validate_sf(const char *sf, struct lora_params_t *params) {
     char *end;
     uint8_t sf_p = strtoul(sf, &end, 10);
+    if (errno || sf == end) return false; // Call failed
+
     if (L_SF <= sf_p && sf_p <= H_SF) {
         params->spread_factor = sf_p;
         return true;
@@ -118,15 +122,30 @@ bool radio_validate_cr(const char *coding_rate, struct lora_params_t *params) {
 }
 
 /**
+ * Validates and sets a command line argument for preamble length.
+ * @param prlen The command line argument for preamble length.
+ * @param params The LoRa parameters to be updated.
+ * @return True if the preamble length was valid and has been set in the params, false otherwise.
+ * */
+bool radio_validate_prlen(const char *prlen, struct lora_params_t *params) {
+    char *end;
+    uint16_t prlen_p = strtoul(prlen, &end, 10);
+    if (errno || prlen == end) return false; // Call failed
+
+    params->preamble_len = prlen_p;
+    return true;
+}
+
+/**
  * Validates and sets a command line argument for bandwidth.
  * @param bandwidth The command line argument for bandwidth.
  * @param params The LoRa parameters to be updated.
  * @return True if the bandwidth was valid and has been set in the params, false otherwise.
  * */
 bool radio_validate_bw(const char *bandwidth, struct lora_params_t *params) {
-    // Parse bandwidth into an unsigned int
     char *end;
     uint16_t bw_p = strtoul(bandwidth, &end, 10);
+    if (errno || bandwidth == end) return false; // Call failed
 
     // Check if it's an option
     for (uint8_t i = 0; i < array_len(BANDWIDTHS); i++) {
@@ -136,6 +155,20 @@ bool radio_validate_bw(const char *bandwidth, struct lora_params_t *params) {
         }
     }
     return false;
+}
+
+/**
+ * Validates and sets a command line argument for sync word.
+ * @param sync The command line argument for sync word.
+ * @param params The LoRa parameters to be updated.
+ * @return True if the sync word was valid and has been set in the params, false otherwise.
+ * */
+bool radio_validate_sync(const char *sync, struct lora_params_t *params) {
+    char *end;
+    uint64_t sync_p = strtoul(sync, &end, 10);
+    if (errno || sync == end) return false; // Call failed
+    params->sync_word = sync_p;
+    return true;
 }
 
 /**

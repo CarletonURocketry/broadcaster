@@ -7,8 +7,23 @@
 #include <termios.h>
 #include <unistd.h>
 
+/** The read buffer size for incoming data. */
 #define BUFFER_SIZE 250
+
+/**
+ * A macro for exiting with a failure when validation fails.
+ * @param vfunc The validation function, which should take optarg and radio_parameters as parameters.
+ * @param message The message to be printed when validation fails. Should include a %s option for optarg.
+ * */
+#define validate_param(vfunc, message)                                                                                 \
+    if (!vfunc(optarg, &radio_parameters)) {                                                                           \
+        fprintf(stderr, message, optarg);                                                                              \
+        exit(EXIT_FAILURE);                                                                                            \
+    }
+
+/** The device name of the serial port connected to the LoRa radio. */
 static const char serial_port[] = "/dev/ser3";
+/** The default radio parameters. */
 static struct lora_params_t radio_parameters = {.modulation = LORA,
                                                 .frequency = 433050000,
                                                 .power = 15,
@@ -16,50 +31,44 @@ static struct lora_params_t radio_parameters = {.modulation = LORA,
                                                 .coding_rate = CR_4_7,
                                                 .bandwidth = 500,
                                                 .preamble_len = 6,
-                                                .cyclic_redundancy = true,
+                                                .cyclic_redundancy = false,
                                                 .iqi = false,
                                                 .sync_word = 0x43};
 
 int main(int argc, char **argv) {
 
     int c;
-    while ((c = getopt(argc, argv, ":m:f:p:s:r:b:")) != 0) {
+    while ((c = getopt(argc, argv, ":m:f:p:s:r:b:l:ciy:")) != -1) {
         switch (c) {
         case 'm':
-            if (!radio_validate_mod(optarg, &radio_parameters)) {
-                fprintf(stderr, "Unknown modulation setting '%s'", optarg);
-                exit(EXIT_FAILURE);
-            }
+            validate_param(radio_validate_mod, "Invalid modulation type '%s'\n");
             break;
         case 'f':
-            if (!radio_validate_freq(optarg, &radio_parameters)) {
-                fprintf(stderr, "Bad frequency setting '%s'", optarg);
-                exit(EXIT_FAILURE);
-            }
+            validate_param(radio_validate_freq, "Invalid frequency value '%s'\n");
             break;
         case 'p':
-            if (!radio_validate_pwr(optarg, &radio_parameters)) {
-                fprintf(stderr, "Bad power setting '%s'", optarg);
-                exit(EXIT_FAILURE);
-            }
+            validate_param(radio_validate_pwr, "Invalid power value '%s'\n");
             break;
         case 's':
-            if (!radio_validate_sf(optarg, &radio_parameters)) {
-                fprintf(stderr, "Bad spread factor '%s'", optarg);
-                exit(EXIT_FAILURE);
-            }
+            validate_param(radio_validate_sf, "Invalid spread factor '%s'\n");
             break;
         case 'r':
-            if (!radio_validate_cr(optarg, &radio_parameters)) {
-                fprintf(stderr, "Bad coding rate '%s'", optarg);
-                exit(EXIT_FAILURE);
-            }
+            validate_param(radio_validate_cr, "Invalid coding rate '%s'\n");
             break;
         case 'b':
-            if (!radio_validate_bw(optarg, &radio_parameters)) {
-                fprintf(stderr, "Invalid bandwidth '%s'", optarg);
-                exit(EXIT_FAILURE);
-            }
+            validate_param(radio_validate_bw, "Invalid bandwidth value '%s'\n");
+            break;
+        case 'l':
+            validate_param(radio_validate_prlen, "Invalid preamble length '%s'\n");
+            break;
+        case 'y':
+            validate_param(radio_validate_sync, "Invalid sync word '%s'\n");
+            break;
+        case 'c':
+            radio_parameters.cyclic_redundancy = true;
+            break;
+        case 'i':
+            radio_parameters.iqi = true;
             break;
         case ':':
             fprintf(stderr, "Option -%c requires an argument.", optopt);
@@ -72,10 +81,10 @@ int main(int argc, char **argv) {
         }
     }
 
-    int radio = open(serial_port, O_RDWR | O_NDELAY | O_NOCTTY, O_SYNC);
+    int radio = open(serial_port, O_RDWR | O_NDELAY | O_NOCTTY);
 
-    if (radio == -1 || !isatty(radio)) {
-        fprintf(stderr, "Could not open tty.");
+    if (radio == -1) {
+        fprintf(stderr, "Could not open tty with error %d\n.", radio);
         exit(EXIT_FAILURE);
     }
 
@@ -94,6 +103,7 @@ int main(int argc, char **argv) {
         close(radio);
         exit(EXIT_FAILURE);
     }
+    tcflush(radio, TCIFLUSH); // Flush all unread messages from radio
 
     // Set radio parameters
     bool success = radio_set_params(radio, &radio_parameters);

@@ -10,7 +10,8 @@ DESCRIPTION:
     module using UART.
 
 SYNTAX:
-    broadcaster [-m mod] [-f freq] [-p pwr] [-s sf] [-r cr] [-b bw]
+    broadcaster [-m mod] [-f freq] [-p pwr] [-s sf] [-r cr] [-b bw] [-l prlen]
+                [-y sync] [-ci]
 
 OPTIONS:
     -m mod      The modulation for the LoRa radio. Values can be "lora" or
@@ -23,3 +24,7 @@ OPTIONS:
                 4/8.
     -b bw       The bandwidth of the LoRa radio in kHz. Can be one of 125, 200,
                 500.
+    -l prlen    The preamble length, within the range 0-65535.
+    -y sync     Sets the sync word. Can be any 64 bit unsigned integer.
+    -c          Turns on cyclic redundancy check.
+    -i          Turns on iqi.
