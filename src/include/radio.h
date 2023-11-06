@@ -49,8 +49,16 @@ struct lora_params_t {
     uint64_t sync_word;
 };
 
+/* PARAMETER VALIDATION. */
+bool radio_validate_mod(const char *mod, struct lora_params_t *params);
+bool radio_validate_freq(const char *freq, struct lora_params_t *params);
+bool radio_validate_pwr(const char *power, struct lora_params_t *params);
+bool radio_validate_sf(const char *power, struct lora_params_t *params);
+bool radio_validate_cr(const char *coding_rate, struct lora_params_t *params);
+bool radio_validate_bw(const char *bandwidth, struct lora_params_t *params);
+
+/* RADIO SETUP. */
 void radio_setup_tty(struct termios *tty);
-void radio_set_timeout(uint64_t timeout);
 bool radio_set_params(int radio_fd, const struct lora_params_t *params);
 bool wait_for_ok(int radio_fd);
 

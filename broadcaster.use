@@ -6,9 +6,20 @@ are welcome to redistribute it under certain conditions. Please see the GNUGPLv3
 license for more details: https://www.gnu.org/licenses/
 
 DESCRIPTION:
-    A command line utility for broadcasting data over an RN2483 LoRa radio module using UART.
+    A command line utility for broadcasting data over an RN2483 LoRa radio
+    module using UART.
 
 SYNTAX:
-    broadcaster
+    broadcaster [-m mod] [-f freq] [-p pwr] [-s sf] [-r cr] [-b bw]
 
 OPTIONS:
+    -m mod      The modulation for the LoRa radio. Values can be "lora" or
+                "fsk".
+    -f freq     The frequency for the LoRa radio in Hz. Must be within the range
+                433000000-434800000 or 863000000-870000000.
+    -p pwr      The LoRa radio transceiver output power, from -3 to 15.
+    -s sf       The spread factor for the LoRa radio. Must be between 7-12.
+    -r cr       The coding rate of the LoRa radio. Can be one of 4/5, 4/6, 4/7,
+                4/8.
+    -b bw       The bandwidth of the LoRa radio in kHz. Can be one of 125, 200,
+                500.

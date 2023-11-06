@@ -1,19 +1,142 @@
 #include "radio.h"
 #include <hw/spi-master.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <termios.h>
 
+#define array_len(a) (sizeof(a) / sizeof(a[0]))
+
 /** Actual value representation of radio parameters. */
 static const char *MODULATIONS[] = {[LORA] = "lora", [FSK] = "fsk"};
+/** Actual value representation of coding rates. */
 static const char *CODING_RATES[] = {
     [CR_4_5] = "4/5",
     [CR_4_6] = "4/6",
     [CR_4_7] = "4/7",
     [CR_4_8] = "4/8",
 };
-/** How many times the LoRa radio module should be polled for a response. */
-static uint64_t timeout = 23;
+
+/** Lower limit for the low frequency value. */
+static const uint32_t LL_FREQ = 433050000;
+/** Upper limit for the low frequency value. */
+static const uint32_t LH_FREQ = 434800000;
+/** Lower limit for the high frequency value. */
+static const uint32_t HL_FREQ = 863000000;
+/** Upper limit for the high frequency value. */
+static const uint32_t HH_FREQ = 870000000;
+
+/** Lower limit for power. */
+static const int8_t L_PWR = -3;
+/** Upper limit for power. */
+static const int8_t H_PWR = 15;
+
+/** Lower limit for spread factor. */
+static const uint8_t L_SF = -3;
+/** Upper limit for spread factor. */
+static const uint8_t H_SF = 15;
+
+/** Valid bandwidth choices. */
+static const uint16_t BANDWIDTHS[] = {100, 150, 200};
+
+/**
+ * Validates and sets a command line argument for modulation.
+ * @param mod The command line argument for modulation.
+ * @param params The LoRa parameters to be updated.
+ * @return True if the modulation was valid and has been set in the params, false otherwise.
+ * */
+bool radio_validate_mod(const char *mod, struct lora_params_t *params) {
+    for (uint8_t i = 0; i < array_len(MODULATIONS); i++) {
+        if (!strcmp(mod, MODULATIONS[i])) {
+            params->modulation = (Modulation)i;
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * Validates and sets a command line argument for frequency.
+ * @param freq The command line argument for frequency.
+ * @param params The LoRa parameters to be updated.
+ * @return True if the frequency was valid and has been set in the params, false otherwise.
+ * */
+bool radio_validate_freq(const char *freq, struct lora_params_t *params) {
+    char *end;
+    uint32_t p_freq = strtoul(freq, &end, 10);
+    if (!(LL_FREQ <= p_freq && p_freq <= LH_FREQ) && !(HL_FREQ <= p_freq <= HH_FREQ)) return false;
+
+    params->frequency = p_freq;
+    return true;
+}
+
+/**
+ * Validates and sets a command line argument for power.
+ * @param pwr The command line argument for power.
+ * @param params The LoRa parameters to be updated.
+ * @return True if the power was valid and has been set in the params, false otherwise.
+ * */
+bool radio_validate_pwr(const char *power, struct lora_params_t *params) {
+    int8_t power_p = atoi(power);
+    if (L_PWR <= power_p && power_p <= H_PWR) {
+        params->power = power_p;
+        return true;
+    }
+    return false;
+}
+
+/**
+ * Validates and sets a command line argument for spread factor.
+ * @param sf The command line argument for spread factor.
+ * @param params The LoRa parameters to be updated.
+ * @return True if the spread factor was valid and has been set in the params, false otherwise.
+ * */
+bool radio_validate_sf(const char *sf, struct lora_params_t *params) {
+    char *end;
+    uint8_t sf_p = strtoul(sf, &end, 10);
+    if (L_SF <= sf_p && sf_p <= H_SF) {
+        params->spread_factor = sf_p;
+        return true;
+    }
+    return false;
+}
+
+/**
+ * Validates and sets a command line argument for coding rate.
+ * @param coding_rate The command line argument for coding rate.
+ * @param params The LoRa parameters to be updated.
+ * @return True if the coding rate was valid and has been set in the params, false otherwise.
+ * */
+bool radio_validate_cr(const char *coding_rate, struct lora_params_t *params) {
+    for (uint8_t i = 0; i < array_len(CODING_RATES); i++) {
+        if (!strcmp(coding_rate, CODING_RATES[i])) {
+            params->coding_rate = (CodingRate)i;
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * Validates and sets a command line argument for bandwidth.
+ * @param bandwidth The command line argument for bandwidth.
+ * @param params The LoRa parameters to be updated.
+ * @return True if the bandwidth was valid and has been set in the params, false otherwise.
+ * */
+bool radio_validate_bw(const char *bandwidth, struct lora_params_t *params) {
+    // Parse bandwidth into an unsigned int
+    char *end;
+    uint16_t bw_p = strtoul(bandwidth, &end, 10);
+
+    // Check if it's an option
+    for (uint8_t i = 0; i < array_len(BANDWIDTHS); i++) {
+        if (bw_p == BANDWIDTHS[i]) {
+            params->bandwidth = bw_p;
+            return true;
+        }
+    }
+    return false;
+}
 
 /**
  * Sets the required parameters for UART communication to work with the LoRa module.
@@ -28,12 +151,6 @@ void radio_setup_tty(struct termios *tty) {
     tty->c_cflag &= ~PARENB;          // No parity
     tty->c_cflag &= ~CSTOPB;          // Only one stop bit
 }
-
-/**
- * Set the timeout for trying to read a response from the LoRa radio module.
- * @param t How many times the LoRa module should be polled for a response.
- * */
-void radio_set_timeout(uint64_t t) { timeout = t; }
 
 /**
  * Set parameters on the LoRa radio.

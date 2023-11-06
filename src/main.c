@@ -1,24 +1,76 @@
 #include "radio.h"
+#include <getopt.h>
 #include <hw/spi-master.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <termios.h>
+#include <unistd.h>
 
 #define BUFFER_SIZE 250
 static const char serial_port[] = "/dev/ser3";
-static const struct lora_params_t radio_parameters = {.modulation = LORA,
-                                                      .frequency = 433050000,
-                                                      .power = 15,
-                                                      .spread_factor = 9,
-                                                      .coding_rate = CR_4_7,
-                                                      .bandwidth = 500,
-                                                      .preamble_len = 6,
-                                                      .cyclic_redundancy = true,
-                                                      .iqi = false,
-                                                      .sync_word = 0x43};
+static struct lora_params_t radio_parameters = {.modulation = LORA,
+                                                .frequency = 433050000,
+                                                .power = 15,
+                                                .spread_factor = 9,
+                                                .coding_rate = CR_4_7,
+                                                .bandwidth = 500,
+                                                .preamble_len = 6,
+                                                .cyclic_redundancy = true,
+                                                .iqi = false,
+                                                .sync_word = 0x43};
 
 int main(int argc, char **argv) {
+
+    int c;
+    while ((c = getopt(argc, argv, ":m:f:p:s:r:b:")) != 0) {
+        switch (c) {
+        case 'm':
+            if (!radio_validate_mod(optarg, &radio_parameters)) {
+                fprintf(stderr, "Unknown modulation setting '%s'", optarg);
+                exit(EXIT_FAILURE);
+            }
+            break;
+        case 'f':
+            if (!radio_validate_freq(optarg, &radio_parameters)) {
+                fprintf(stderr, "Bad frequency setting '%s'", optarg);
+                exit(EXIT_FAILURE);
+            }
+            break;
+        case 'p':
+            if (!radio_validate_pwr(optarg, &radio_parameters)) {
+                fprintf(stderr, "Bad power setting '%s'", optarg);
+                exit(EXIT_FAILURE);
+            }
+            break;
+        case 's':
+            if (!radio_validate_sf(optarg, &radio_parameters)) {
+                fprintf(stderr, "Bad spread factor '%s'", optarg);
+                exit(EXIT_FAILURE);
+            }
+            break;
+        case 'r':
+            if (!radio_validate_cr(optarg, &radio_parameters)) {
+                fprintf(stderr, "Bad coding rate '%s'", optarg);
+                exit(EXIT_FAILURE);
+            }
+            break;
+        case 'b':
+            if (!radio_validate_bw(optarg, &radio_parameters)) {
+                fprintf(stderr, "Invalid bandwidth '%s'", optarg);
+                exit(EXIT_FAILURE);
+            }
+            break;
+        case ':':
+            fprintf(stderr, "Option -%c requires an argument.", optopt);
+            exit(EXIT_FAILURE);
+            break;
+        case '?':
+            fprintf(stderr, "Unknown option -%c\n", optopt);
+            exit(EXIT_FAILURE);
+            break;
+        }
+    }
 
     int radio = open(serial_port, O_RDWR | O_NDELAY | O_NOCTTY, O_SYNC);
 
