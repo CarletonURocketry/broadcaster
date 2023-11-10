@@ -81,16 +81,20 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="radio_8h_source.html">radio.h</a>&quot;</code><br />
+<code>#include &lt;getopt.h&gt;</code><br />
 <code>#include &lt;hw/spi-master.h&gt;</code><br />
 <code>#include &lt;stdio.h&gt;</code><br />
 <code>#include &lt;stdlib.h&gt;</code><br />
 <code>#include &lt;string.h&gt;</code><br />
 <code>#include &lt;termios.h&gt;</code><br />
+<code>#include &lt;unistd.h&gt;</code><br />
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
 <tr class="memitem:a6b20d41d6252e9871430c242cb1a56e7"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="main_8c.html#a6b20d41d6252e9871430c242cb1a56e7">BUFFER_SIZE</a>&#160;&#160;&#160;250</td></tr>
 <tr class="separator:a6b20d41d6252e9871430c242cb1a56e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a18fd22b406401357523a9d66220e6571"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="main_8c.html#a18fd22b406401357523a9d66220e6571">validate_param</a>(vfunc,  message)</td></tr>
+<tr class="separator:a18fd22b406401357523a9d66220e6571"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
@@ -109,6 +113,46 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p >The read buffer size for incoming data. </p>
+
+</div>
+</div>
+<a id="a18fd22b406401357523a9d66220e6571" name="a18fd22b406401357523a9d66220e6571"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a18fd22b406401357523a9d66220e6571">&#9670;&#160;</a></span>validate_param</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define validate_param</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">vfunc, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">message&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line">    <span class="keywordflow">if</span> (!vfunc(optarg, &amp;radio_parameters)) {                                                                           \</div>
+<div class="line">        fprintf(stderr, message, optarg);                                                                              \</div>
+<div class="line">        exit(EXIT_FAILURE);                                                                                            \</div>
+<div class="line">    }</div>
+</div><!-- fragment --><p >A macro for exiting with a failure when validation fails. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">vfunc</td><td>The validation function, which should take optarg and radio_parameters as parameters. </td></tr>
+    <tr><td class="paramname">message</td><td>The message to be printed when validation fails. Should include a s option for optarg. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

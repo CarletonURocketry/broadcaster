@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['wait_5ffor_5fok_0',['wait_for_ok',['../radio_8c.html#a7c1a28b606b1f60faec3946e828c5c6e',1,'wait_for_ok(int radio_fd):&#160;radio.c'],['../radio_8h.html#a7c1a28b606b1f60faec3946e828c5c6e',1,'wait_for_ok(int radio_fd):&#160;radio.c']]]
+  ['spread_5ffactor_0',['spread_factor',['../structlora__params__t.html#abf3531d04e5a6bbf292c8f7e2b96f70f',1,'lora_params_t']]],
+  ['sync_5fword_1',['sync_word',['../structlora__params__t.html#a9d6fa4d22bd61f198d244a82bb328551',1,'lora_params_t']]]
 ];
