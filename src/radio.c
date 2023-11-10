@@ -233,6 +233,9 @@ bool radio_set_params(int radio_fd, const struct lora_params_t *params) {
     dprintf(radio_fd, "radio set sync %lx\n", params->sync_word);
     tcdrain(radio_fd);
     if (!wait_for_ok(radio_fd)) return false;
+    dprintf(radio_fd, "radio set wdt 0\n"); // Turn off the watchdog so our params don't reset with inactivity
+    tcdrain(radio_fd);
+    if (!wait_for_ok(radio_fd)) return false;
 
     return true;
 }
