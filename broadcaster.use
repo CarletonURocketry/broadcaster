@@ -9,9 +9,13 @@ DESCRIPTION:
     A command line utility for broadcasting data over an RN2483 LoRa radio
     module using UART.
 
+    All data provided to broadcaster must be encoded in ASCII using only valid
+    hexadecimal characters. If broadcaster is not provided with an input file,
+    it will read from stdin.
+
 SYNTAX:
     broadcaster [-m mod] [-f freq] [-p pwr] [-s sf] [-r cr] [-b bw] [-l prlen]
-                [-y sync] [-ci]
+                [-y sync] [-i file] [-cq]
 
 OPTIONS:
     -m mod      The modulation for the LoRa radio. Values can be "lora" or
@@ -27,4 +31,5 @@ OPTIONS:
     -l prlen    The preamble length, within the range 0-65535.
     -y sync     Sets the sync word. Can be any 64 bit unsigned integer.
     -c          Turns on cyclic redundancy check.
-    -i          Turns on iqi.
+    -q          Turns on iqi.
+    -i file     The input file containing data to be transmitted.

@@ -7,8 +7,13 @@
 #include <termios.h>
 #include <unistd.h>
 
-/** The read buffer size for incoming data. */
-#define BUFFER_SIZE 250
+/** The read buffer size for incoming data.
+ * Since no radio packet can be greater than 512 bytes, and data is provided in ASCII encoding for hex symbols, one byte
+ * of data will be one ASCII hex character. So a 512 character buffer is sufficient for all packet sizes. */
+#define BUFFER_SIZE 512
+
+/** The read buffer for input. */
+static char buffer[BUFFER_SIZE] = {0};
 
 /**
  * A macro for exiting with a failure when validation fails.
@@ -35,10 +40,13 @@ static struct lora_params_t radio_parameters = {.modulation = LORA,
                                                 .iqi = false,
                                                 .sync_word = 0x43};
 
+/** The input file to be read and transmitted. */
+static char *input_file = NULL;
+
 int main(int argc, char **argv) {
 
     int c;
-    while ((c = getopt(argc, argv, ":m:f:p:s:r:b:l:ciy:")) != -1) {
+    while ((c = getopt(argc, argv, ":m:f:p:s:r:b:l:cqy:i:")) != -1) {
         switch (c) {
         case 'm':
             validate_param(radio_validate_mod, "Invalid modulation type '%s'\n");
@@ -67,8 +75,11 @@ int main(int argc, char **argv) {
         case 'c':
             radio_parameters.cyclic_redundancy = true;
             break;
-        case 'i':
+        case 'q':
             radio_parameters.iqi = true;
+            break;
+        case 'i':
+            input_file = optarg;
             break;
         case ':':
             fprintf(stderr, "Option -%c requires an argument.", optopt);
@@ -81,14 +92,14 @@ int main(int argc, char **argv) {
         }
     }
 
+    /* Open radio for reading and writing. */
     int radio = open(serial_port, O_RDWR | O_NDELAY | O_NOCTTY);
-
     if (radio == -1) {
         fprintf(stderr, "Could not open tty with error %d\n.", radio);
         exit(EXIT_FAILURE);
     }
 
-    // Set up port
+    /* Set up device using correct UART settings. */
     struct termios tty;
     if (tcgetattr(radio, &tty) != 0) {
         fprintf(stderr, "Failed to get tty attributes with error %d\n", errno);
@@ -105,17 +116,37 @@ int main(int argc, char **argv) {
     }
     tcflush(radio, TCIFLUSH); // Flush all unread messages from radio
 
-    // Set radio parameters
-    bool success = radio_set_params(radio, &radio_parameters);
-    if (!success) {
+    /* Set radio parameters */
+    if (!radio_set_params(radio, &radio_parameters)) {
         close(radio);
         fprintf(stderr, "Failed to set radio parameters\n");
     }
 
-    // Start transmitting
-    dprintf(radio, "radio tx %x\n", 0x111);
-    tcdrain(radio);
+    /* Open input stream for constant transmission. */
+    FILE *instream;
+    if (input_file) {
+        instream = fopen(input_file, "r");
+        if (!instream) {
+            fprintf(stderr, "Could not open file '%s' for reading.\n", input_file);
+            exit(EXIT_FAILURE);
+        }
+    } else {
+        instream = stdin;
+    }
+
+    /** Read input stream data line by line. */
+    while (fgets(buffer, BUFFER_SIZE, instream) != NULL) {
+        dprintf(radio, "radio tx %s\n", buffer); // Re-transmit what was read over radio
+        printf("radio tx %s\n", buffer);
+        tcdrain(radio); // Wait for radio to receive message
+
+        // Wait for ok response, but if it fails just log and continue
+        if (!wait_for_ok(radio)) {
+            fprintf(stderr, "Failed to transmit %s\n", buffer);
+        }
+    }
 
     close(radio);
+    if (input_file) fclose(instream); // Only close if not reading from stdin
     return EXIT_SUCCESS;
 }

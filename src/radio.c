@@ -1,3 +1,13 @@
+/**
+ * @file radio.c
+ * @brief Contains functions for configuring the LoRa radio, and constants for valid radio parameters.
+ *
+ * This file contains implementations of functions for setting the LoRa radio parameters. It also contains functions for
+ * configuring the UART connection to the LoRa radio module.
+ *
+ * There are several functions included for parsing command line arguments for radio parameters into their correct types
+ * and validating them.
+ */
 #include "radio.h"
 #include <hw/spi-master.h>
 #include <stdio.h>
