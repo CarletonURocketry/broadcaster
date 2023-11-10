@@ -91,7 +91,7 @@ $(function() {
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:a6b20d41d6252e9871430c242cb1a56e7"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="main_8c.html#a6b20d41d6252e9871430c242cb1a56e7">BUFFER_SIZE</a>&#160;&#160;&#160;250</td></tr>
+<tr class="memitem:a6b20d41d6252e9871430c242cb1a56e7"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="main_8c.html#a6b20d41d6252e9871430c242cb1a56e7">BUFFER_SIZE</a>&#160;&#160;&#160;512</td></tr>
 <tr class="separator:a6b20d41d6252e9871430c242cb1a56e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a18fd22b406401357523a9d66220e6571"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="main_8c.html#a18fd22b406401357523a9d66220e6571">validate_param</a>(vfunc,  message)</td></tr>
 <tr class="separator:a18fd22b406401357523a9d66220e6571"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -109,11 +109,11 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define BUFFER_SIZE&#160;&#160;&#160;250</td>
+          <td class="memname">#define BUFFER_SIZE&#160;&#160;&#160;512</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >The read buffer size for incoming data. </p>
+<p >The read buffer size for incoming data. Since no radio packet can be greater than 512 bytes, and data is provided in ASCII encoding for hex symbols, one byte of data will be one ASCII hex character. So a 512 character buffer is sufficient for all packet sizes. </p>
 
 </div>
 </div>
@@ -182,6 +182,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p >Read input stream data line by line.</p>
 
 </div>
 </div>
