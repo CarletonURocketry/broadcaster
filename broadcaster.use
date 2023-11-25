@@ -15,7 +15,10 @@ DESCRIPTION:
 
 SYNTAX:
     broadcaster [-m mod] [-f freq] [-p pwr] [-s sf] [-r cr] [-b bw] [-l prlen]
-                [-y sync] [-i file] [-cq]
+                [-y sync] [-i file] [-cq] device
+
+ARGUMENTS:
+    device      The device descriptor for the RN2483 LoRa module/UART port.
 
 OPTIONS:
     -m mod      The modulation for the LoRa radio. Values can be "lora" or
