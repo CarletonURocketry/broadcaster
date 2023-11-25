@@ -27,7 +27,8 @@ static char buffer[BUFFER_SIZE] = {0};
     }
 
 /** The device name of the serial port connected to the LoRa radio. */
-static const char serial_port[] = "/dev/ser3";
+static char *serial_port = NULL;
+
 /** The default radio parameters. */
 static struct lora_params_t radio_parameters = {.modulation = LORA,
                                                 .frequency = 433050000,
@@ -91,6 +92,13 @@ int main(int argc, char **argv) {
             break;
         }
     }
+
+    /* Positional argument for device descriptor. */
+    if (optind >= argc) {
+        fprintf(stderr, "LoRa module device descriptor is required.\n");
+        exit(EXIT_FAILURE);
+    }
+    serial_port = argv[optind];
 
     /* Open radio for reading and writing. */
     int radio = open(serial_port, O_RDWR | O_NDELAY | O_NOCTTY);
