@@ -144,12 +144,9 @@ int main(int argc, char **argv) {
 
     /** Read input stream data line by line. */
     while (fgets(buffer, BUFFER_SIZE, instream) != NULL) {
-        dprintf(radio, "radio tx %s\n", buffer); // Re-transmit what was read over radio
-        printf("radio tx %s\n", buffer);
-        tcdrain(radio); // Wait for radio to receive message
 
         // Wait for ok response, but if it fails just log and continue
-        if (!wait_for_ok(radio)) {
+        if (!radio_tx(radio, buffer)) {
             fprintf(stderr, "Failed to transmit %s\n", buffer);
         }
     }
