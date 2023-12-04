@@ -9,11 +9,13 @@
  * and validating them.
  */
 #include "radio.h"
-#include <hw/spi-master.h>
+#include <errno.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <termios.h>
+#include <unistd.h>
 
 #define array_len(a) (sizeof(a) / sizeof(a[0]))
 
