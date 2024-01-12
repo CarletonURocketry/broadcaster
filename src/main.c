@@ -13,6 +13,9 @@
  * of data will be one ASCII hex character. So a 512 character buffer is sufficient for all packet sizes. */
 #define BUFFER_SIZE 512
 
+/** How many times broadcaster will attempt to transmit a packet before giving up. */
+#define RETRY_LIMIT 3
+
 /** The read buffer for input. */
 static char buffer[BUFFER_SIZE] = {0};
 
@@ -143,13 +146,15 @@ int main(int argc, char **argv) {
         instream = stdin;
     }
 
-    /** Read input stream data line by line. */
+    /* Read input stream data line by line. */
     while (fgets(buffer, BUFFER_SIZE, instream) != NULL) {
 
-        // Wait for ok response, but if it fails just log and continue
-        if (!radio_tx(radio, buffer)) {
-            fprintf(stderr, "Failed to transmit %s\n", buffer);
-        }
+        uint8_t i = 0;
+        while (i < RETRY_LIMIT && !radio_tx(radio, buffer))
+            ; // Try 3 times
+
+        // If transmission fails just log and continue
+        if (i >= RETRY_LIMIT) fprintf(stderr, "Failed to transmit %s\n", buffer);
     }
 
     close(radio);
