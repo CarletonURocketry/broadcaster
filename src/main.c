@@ -129,7 +129,10 @@ int main(int argc, char **argv) {
     tcflush(radio, TCIFLUSH); // Flush all unread messages from radio
 
     /* Set radio parameters */
-    if (!radio_set_params(radio, &radio_parameters)) {
+    uint8_t count = 0;
+    for (; !radio_set_params(radio, &radio_parameters) && count < RETRY_LIMIT; count++)
+        ;
+    if (count == RETRY_LIMIT) {
         close(radio);
         fprintf(stderr, "Failed to set radio parameters\n");
     }
