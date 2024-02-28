@@ -32,7 +32,7 @@ OPTIONS:
                 Defaults to 9.
     -r cr       The coding rate of the LoRa radio. Can be one of 4/5, 4/6, 4/7,
                 4/8. Defaults to 4/7.
-    -b bw       The bandwidth of the LoRa radio in kHz. Can be one of 125, 200,
+    -b bw       The bandwidth of the LoRa radio in kHz. Can be one of 125, 250,
                 500. Defaults to 500.
     -l prlen    The preamble length, within the range 0-65535. Defaults to 6.
     -y sync     Sets the sync word. Can be any 64 bit unsigned integer. Defaults

@@ -44,12 +44,12 @@ static const int8_t L_PWR = -3;
 static const int8_t H_PWR = 15;
 
 /** Lower limit for spread factor. */
-static const uint8_t L_SF = -3;
+static const uint8_t L_SF = 7;
 /** Upper limit for spread factor. */
-static const uint8_t H_SF = 15;
+static const uint8_t H_SF = 12;
 
 /** Valid bandwidth choices. */
-static const uint16_t BANDWIDTHS[] = {100, 150, 200};
+static const uint16_t BANDWIDTHS[] = {125, 250, 500};
 
 /**
  * Validates and sets a command line argument for modulation.
