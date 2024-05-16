@@ -2,6 +2,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <getopt.h>
+#include <mqueue.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,8 +17,17 @@
 /** How many times broadcaster will attempt to transmit a packet before giving up. */
 #define RETRY_LIMIT 3
 
+/** The name of the message queue to read input from. */
+#define IN_QUEUE "packager-out"
+
 /** The read buffer for input. */
-static char buffer[BUFFER_SIZE] = {0};
+char buffer[BUFFER_SIZE];
+
+/** Whether to read from a message queue or from stdin. Queue by default. */
+bool from_q = true;
+
+/** Input message queue file descriptor. */
+mqd_t input_q;
 
 /**
  * A macro for exiting with a failure when validation fails.
@@ -45,13 +55,10 @@ static struct lora_params_t radio_parameters = {.modulation = LORA,
                                                 .iqi = false,
                                                 .sync_word = 0x43};
 
-/** The input file to be read and transmitted. */
-static char *input_file = NULL;
-
 int main(int argc, char **argv) {
 
     int c;
-    while ((c = getopt(argc, argv, ":m:f:p:s:r:b:l:cqy:i:")) != -1) {
+    while ((c = getopt(argc, argv, ":m:f:p:s:r:b:l:cqy:i")) != -1) {
         switch (c) {
         case 'm':
             validate_param(radio_validate_mod, "Invalid modulation type '%s'\n");
@@ -84,7 +91,7 @@ int main(int argc, char **argv) {
             radio_parameters.iqi = true;
             break;
         case 'i':
-            input_file = optarg;
+            from_q = false;
             break;
         case ':':
             fprintf(stderr, "Option -%c requires an argument.", optopt);
@@ -103,6 +110,15 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
     serial_port = argv[optind];
+
+    /* Open message queue for input if not reading from stdin. */
+    if (from_q) {
+        input_q = mq_open(IN_QUEUE, O_RDONLY);
+        if (input_q == -1) {
+            fprintf(stderr, "Could not open input message queue %s: %s\n", IN_QUEUE, strerror(errno));
+            exit(EXIT_FAILURE);
+        }
+    }
 
     /* Open radio for reading and writing. */
     int radio = open(serial_port, O_RDWR | O_NDELAY | O_NOCTTY);
@@ -137,30 +153,32 @@ int main(int argc, char **argv) {
         fprintf(stderr, "Failed to set radio parameters\n");
     }
 
-    /* Open input stream for constant transmission. */
-    FILE *instream;
-    if (input_file) {
-        instream = fopen(input_file, "r");
-        if (!instream) {
-            fprintf(stderr, "Could not open file '%s' for reading.\n", input_file);
-            exit(EXIT_FAILURE);
-        }
-    } else {
-        instream = stdin;
-    }
-
     /* Read input stream data line by line. */
-    while (fgets(buffer, BUFFER_SIZE, instream) != NULL) {
+    while (1) {
 
-        uint8_t i = 0;
-        while (i < RETRY_LIMIT && !radio_tx(radio, buffer))
-            ; // Try 3 times
+        uint8_t transmission_tries = 0;
+
+        if (from_q) {
+            size_t nbytes;
+            nbytes = mq_receive(input_q, buffer, BUFFER_SIZE, NULL);
+            if (nbytes == (size_t)-1) {
+                fprintf(stderr, "Failed to read from queue: %s\n", strerror(errno));
+                // Don't quit, just continue
+                continue;
+            }
+            while (transmission_tries < RETRY_LIMIT && !radio_tx_bytes(radio, (uint8_t *)buffer, nbytes))
+                ; // Try 3 times
+        } else {
+            // End of input stream triggers program exit
+            if (fgets(buffer, BUFFER_SIZE, stdin) == NULL) break;
+            while (transmission_tries < RETRY_LIMIT && !radio_tx(radio, buffer))
+                ; // Try 3 times
+        }
 
         // If transmission fails just log and continue
-        if (i >= RETRY_LIMIT) fprintf(stderr, "Failed to transmit %s\n", buffer);
+        if (transmission_tries >= RETRY_LIMIT) fprintf(stderr, "Failed to transmit %s\n", buffer);
     }
 
     close(radio);
-    if (input_file) fclose(instream); // Only close if not reading from stdin
     return EXIT_SUCCESS;
 }

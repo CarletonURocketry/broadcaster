@@ -15,7 +15,7 @@ DESCRIPTION:
 
 SYNTAX:
     broadcaster [-m mod] [-f freq] [-p pwr] [-s sf] [-r cr] [-b bw] [-l prlen]
-                [-y sync] [-i file] [-cq] device
+                [-y sync] [-cq] device
 
 ARGUMENTS:
     device      The device descriptor for the RN2483 LoRa module/UART port.
@@ -39,4 +39,4 @@ OPTIONS:
                 to 0x43.
     -c          Turns on cyclic redundancy check. Defaults to off.
     -q          Turns on iqi. Defaults to off.
-    -i file     The input file containing data to be transmitted.
+    -i          Toggle input to be read from stdin instead of message queue.

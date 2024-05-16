@@ -68,5 +68,6 @@ bool radio_set_params(int radio_fd, const struct lora_params_t *params);
 /* RADIO COMMUNICATION */
 bool wait_for_ok(int radio_fd);
 bool radio_tx(int radio_fd, const char *data);
+bool radio_tx_bytes(int radio_fd, const uint8_t *data, size_t nbytes);
 
 #endif // _RADIO_H_

@@ -279,3 +279,29 @@ bool radio_tx(int radio_fd, const char *data) {
     tcdrain(radio_fd);                        // Wait for radio to process transmit request
     return wait_for_ok(radio_fd);             // Return result of radio response
 }
+
+/**
+ * Transmits the passed binary data over LoRa radio.
+ * @param radio_fd The file descriptor to the LoRa radio device.
+ * @param data A pointer to the data to be sent over radio.
+ * @param nbytes The number of bytes in the `data` pointer to transmit.
+ * @return True if the data was transmitted successfully, false otherwise.
+ */
+bool radio_tx_bytes(int radio_fd, const uint8_t *data, size_t nbytes) {
+    dprintf(radio_fd, "mac pause\n"); // Mac pause to not reset parameters
+    tcdrain(radio_fd);                // Wait for radio to process mac pause command
+
+    // Check that mac pause returned non-0 (success)
+    char buffer[10] = {0};
+    read(radio_fd, buffer, sizeof(buffer));
+    if (!strcmp(buffer, "0")) return false; // If 0 is the string then return false
+
+    // Send all bytes as hex
+    dprintf(radio_fd, "radio tx ");
+    for (size_t i = 0; i < nbytes; i++) {
+        dprintf(radio_fd, "%02x", data[i]);
+    }
+    dprintf(radio_fd, "\n");
+    tcdrain(radio_fd);            // Wait for radio to process transmit request
+    return wait_for_ok(radio_fd); // Return result of radio response
+}
