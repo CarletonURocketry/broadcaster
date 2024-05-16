@@ -123,6 +123,8 @@ Functions</h2></td></tr>
 <tr class="separator:a7c1a28b606b1f60faec3946e828c5c6e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab822bc445e6ee7967351b71e6204b2b6"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="radio_8c.html#ab822bc445e6ee7967351b71e6204b2b6">radio_tx</a> (int radio_fd, const char *data)</td></tr>
 <tr class="separator:ab822bc445e6ee7967351b71e6204b2b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a071ef9d29287b63698e1c2e9ff0d3bfc"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="radio_8c.html#a071ef9d29287b63698e1c2e9ff0d3bfc">radio_tx_bytes</a> (int radio_fd, const uint8_t *data, size_t nbytes)</td></tr>
+<tr class="separator:a071ef9d29287b63698e1c2e9ff0d3bfc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Contains functions for configuring the LoRa radio, and constants for valid radio parameters. </p>
@@ -237,6 +239,49 @@ Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramname">radio_fd</td><td>The file descriptor to the LoRa radio device. </td></tr>
     <tr><td class="paramname">data</td><td>A pointer to the data to be sent over radio. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if the data was transmitted successfully, false otherwise. </dd></dl>
+
+</div>
+</div>
+<a id="a071ef9d29287b63698e1c2e9ff0d3bfc" name="a071ef9d29287b63698e1c2e9ff0d3bfc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a071ef9d29287b63698e1c2e9ff0d3bfc">&#9670;&#160;</a></span>radio_tx_bytes()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool radio_tx_bytes </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>radio_fd</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>nbytes</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p >Transmits the passed binary data over LoRa radio. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">radio_fd</td><td>The file descriptor to the LoRa radio device. </td></tr>
+    <tr><td class="paramname">data</td><td>A pointer to the data to be sent over radio. </td></tr>
+    <tr><td class="paramname">nbytes</td><td>The number of bytes in the <code>data</code> pointer to transmit. </td></tr>
   </table>
   </dd>
 </dl>

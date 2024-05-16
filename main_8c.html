@@ -76,7 +76,8 @@ $(function() {
 <div class="header">
   <div class="summary">
 <a href="#define-members">Macros</a> &#124;
-<a href="#func-members">Functions</a>  </div>
+<a href="#func-members">Functions</a> &#124;
+<a href="#var-members">Variables</a>  </div>
   <div class="headertitle"><div class="title">main.c File Reference</div></div>
 </div><!--header-->
 <div class="contents">
@@ -84,6 +85,7 @@ $(function() {
 <code>#include &lt;errno.h&gt;</code><br />
 <code>#include &lt;fcntl.h&gt;</code><br />
 <code>#include &lt;getopt.h&gt;</code><br />
+<code>#include &lt;mqueue.h&gt;</code><br />
 <code>#include &lt;stdio.h&gt;</code><br />
 <code>#include &lt;stdlib.h&gt;</code><br />
 <code>#include &lt;string.h&gt;</code><br />
@@ -94,6 +96,10 @@ $(function() {
 Macros</h2></td></tr>
 <tr class="memitem:a6b20d41d6252e9871430c242cb1a56e7"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="main_8c.html#a6b20d41d6252e9871430c242cb1a56e7">BUFFER_SIZE</a>&#160;&#160;&#160;512</td></tr>
 <tr class="separator:a6b20d41d6252e9871430c242cb1a56e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad4eba3b0ea03f397bae8792d0f0e4cd4"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="main_8c.html#ad4eba3b0ea03f397bae8792d0f0e4cd4">RETRY_LIMIT</a>&#160;&#160;&#160;3</td></tr>
+<tr class="separator:ad4eba3b0ea03f397bae8792d0f0e4cd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af0411b67a2dba87758fee4f77c888558"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="main_8c.html#af0411b67a2dba87758fee4f77c888558">IN_QUEUE</a>&#160;&#160;&#160;&quot;packager-out&quot;</td></tr>
+<tr class="separator:af0411b67a2dba87758fee4f77c888558"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a18fd22b406401357523a9d66220e6571"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="main_8c.html#a18fd22b406401357523a9d66220e6571">validate_param</a>(vfunc,  message)</td></tr>
 <tr class="separator:a18fd22b406401357523a9d66220e6571"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -101,6 +107,15 @@ Macros</h2></td></tr>
 Functions</h2></td></tr>
 <tr class="memitem:a3c04138a5bfe5d72780bb7e82a18e627"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="main_8c.html#a3c04138a5bfe5d72780bb7e82a18e627">main</a> (int argc, char **argv)</td></tr>
 <tr class="separator:a3c04138a5bfe5d72780bb7e82a18e627"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:af00b615ca097c43dbb02ae3a00ea3a62"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="main_8c.html#af00b615ca097c43dbb02ae3a00ea3a62">buffer</a> [<a class="el" href="main_8c.html#a6b20d41d6252e9871430c242cb1a56e7">BUFFER_SIZE</a>]</td></tr>
+<tr class="separator:af00b615ca097c43dbb02ae3a00ea3a62"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2e200991063e6ea86174a4822b3421f8"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="main_8c.html#a2e200991063e6ea86174a4822b3421f8">from_q</a> = true</td></tr>
+<tr class="separator:a2e200991063e6ea86174a4822b3421f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a27719cd8ae7f31f261a75535499776da"><td class="memItemLeft" align="right" valign="top">mqd_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="main_8c.html#a27719cd8ae7f31f261a75535499776da">input_q</a></td></tr>
+<tr class="separator:a27719cd8ae7f31f261a75535499776da"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
 <a id="a6b20d41d6252e9871430c242cb1a56e7" name="a6b20d41d6252e9871430c242cb1a56e7"></a>
@@ -115,6 +130,36 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p >The read buffer size for incoming data. Since no radio packet can be greater than 512 bytes, and data is provided in ASCII encoding for hex symbols, one byte of data will be one ASCII hex character. So a 512 character buffer is sufficient for all packet sizes. </p>
+
+</div>
+</div>
+<a id="af0411b67a2dba87758fee4f77c888558" name="af0411b67a2dba87758fee4f77c888558"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af0411b67a2dba87758fee4f77c888558">&#9670;&#160;</a></span>IN_QUEUE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define IN_QUEUE&#160;&#160;&#160;&quot;packager-out&quot;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p >The name of the message queue to read input from. </p>
+
+</div>
+</div>
+<a id="ad4eba3b0ea03f397bae8792d0f0e4cd4" name="ad4eba3b0ea03f397bae8792d0f0e4cd4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad4eba3b0ea03f397bae8792d0f0e4cd4">&#9670;&#160;</a></span>RETRY_LIMIT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define RETRY_LIMIT&#160;&#160;&#160;3</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p >How many times broadcaster will attempt to transmit a packet before giving up. </p>
 
 </div>
 </div>
@@ -183,7 +228,52 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Read input stream data line by line.</p>
+
+</div>
+</div>
+<h2 class="groupheader">Variable Documentation</h2>
+<a id="af00b615ca097c43dbb02ae3a00ea3a62" name="af00b615ca097c43dbb02ae3a00ea3a62"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af00b615ca097c43dbb02ae3a00ea3a62">&#9670;&#160;</a></span>buffer</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char buffer[<a class="el" href="main_8c.html#a6b20d41d6252e9871430c242cb1a56e7">BUFFER_SIZE</a>]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p >The read buffer for input. </p>
+
+</div>
+</div>
+<a id="a2e200991063e6ea86174a4822b3421f8" name="a2e200991063e6ea86174a4822b3421f8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2e200991063e6ea86174a4822b3421f8">&#9670;&#160;</a></span>from_q</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool from_q = true</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p >Whether to read from a message queue or from stdin. Queue by default. </p>
+
+</div>
+</div>
+<a id="a27719cd8ae7f31f261a75535499776da" name="a27719cd8ae7f31f261a75535499776da"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a27719cd8ae7f31f261a75535499776da">&#9670;&#160;</a></span>input_q</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">mqd_t input_q</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p >Input message queue file descriptor. </p>
 
 </div>
 </div>
