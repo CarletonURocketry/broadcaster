@@ -55,13 +55,10 @@ static struct lora_params_t radio_parameters = {.modulation = LORA,
                                                 .iqi = false,
                                                 .sync_word = 0x43};
 
-/** The input file to be read and transmitted. */
-static char *input_file = NULL;
-
 int main(int argc, char **argv) {
 
     int c;
-    while ((c = getopt(argc, argv, ":m:f:p:s:r:b:l:cqy:i:")) != -1) {
+    while ((c = getopt(argc, argv, ":m:f:p:s:r:b:l:cqy:i")) != -1) {
         switch (c) {
         case 'm':
             validate_param(radio_validate_mod, "Invalid modulation type '%s'\n");
