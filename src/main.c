@@ -164,6 +164,7 @@ int main(int argc, char **argv) {
             if (nbytes == (size_t)-1) {
                 fprintf(stderr, "Failed to read from queue: %s\n", strerror(errno));
                 // Don't quit, just continue
+                continue;
             }
             while (transmission_tries < RETRY_LIMIT && !radio_tx_bytes(radio, (uint8_t *)buffer, nbytes))
                 ; // Try 3 times
