@@ -41,10 +41,10 @@ mqd_t input_q;
     }
 
 /** The device name of the serial port connected to the LoRa radio. */
-static char *serial_port = NULL;
+char *serial_port = NULL;
 
 /** The default radio parameters. */
-static struct lora_params_t radio_parameters = {.modulation = LORA,
+struct lora_params_t radio_parameters = {.modulation = LORA,
                                                 .frequency = 433050000,
                                                 .power = 15,
                                                 .spread_factor = 9,
