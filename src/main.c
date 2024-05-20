@@ -51,7 +51,7 @@ struct lora_params_t radio_parameters = {.modulation = LORA,
                                                 .coding_rate = CR_4_7,
                                                 .bandwidth = 500,
                                                 .preamble_len = 6,
-                                                .cyclic_redundancy = false,
+                                                .cyclic_redundancy = true,
                                                 .iqi = false,
                                                 .sync_word = 0x43};
 
