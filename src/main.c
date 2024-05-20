@@ -47,7 +47,7 @@ char *serial_port = NULL;
 struct lora_params_t radio_parameters = {.modulation = LORA,
                                                 .frequency = 433050000,
                                                 .power = 15,
-                                                .spread_factor = 9,
+                                                .spread_factor = 7,
                                                 .coding_rate = CR_4_7,
                                                 .bandwidth = 500,
                                                 .preamble_len = 6,
