@@ -126,7 +126,6 @@ int main(int argc, char **argv) {
         fprintf(stderr, "Could not open tty with error %d\n.", radio);
         exit(EXIT_FAILURE);
     }
-    tcflush(radio, TCIFLUSH); // Flush all unread messages from radio
 
     /* Set radio parameters */
     uint8_t count = 0;
