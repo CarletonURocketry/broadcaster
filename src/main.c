@@ -45,15 +45,15 @@ char *serial_port = NULL;
 
 /** The default radio parameters. */
 struct lora_params_t radio_parameters = {.modulation = LORA,
-                                                .frequency = 433050000,
-                                                .power = 15,
-                                                .spread_factor = 7,
-                                                .coding_rate = CR_4_7,
-                                                .bandwidth = 500,
-                                                .preamble_len = 6,
-                                                .cyclic_redundancy = true,
-                                                .iqi = false,
-                                                .sync_word = 0x43};
+                                         .frequency = 433050000,
+                                         .power = 15,
+                                         .spread_factor = 7,
+                                         .coding_rate = CR_4_7,
+                                         .bandwidth = 500,
+                                         .preamble_len = 6,
+                                         .cyclic_redundancy = true,
+                                         .iqi = false,
+                                         .sync_word = 0x43};
 
 int main(int argc, char **argv) {
 
@@ -126,22 +126,6 @@ int main(int argc, char **argv) {
         fprintf(stderr, "Could not open tty with error %d\n.", radio);
         exit(EXIT_FAILURE);
     }
-
-    /* Set up device using correct UART settings. */
-    struct termios tty;
-    if (tcgetattr(radio, &tty) != 0) {
-        fprintf(stderr, "Failed to get tty attributes with error %d\n", errno);
-        close(radio);
-        exit(EXIT_FAILURE);
-    }
-
-    radio_setup_tty(&tty);
-
-    if (tcsetattr(radio, TCSANOW, &tty) != 0) {
-        fprintf(stderr, "Failed to set tty attrs with error %d\n", errno);
-        close(radio);
-        exit(EXIT_FAILURE);
-    }
     tcflush(radio, TCIFLUSH); // Flush all unread messages from radio
 
     /* Set radio parameters */
@@ -168,6 +152,11 @@ int main(int argc, char **argv) {
             }
             while (transmission_tries < RETRY_LIMIT && !radio_tx_bytes(radio, (uint8_t *)buffer, nbytes))
                 ; // Try 3 times
+
+            if (transmission_tries >= RETRY_LIMIT) {
+                fprintf(stderr, "Failed to transmit after %u tries.\n", transmission_tries);
+            }
+
         } else {
             // End of input stream triggers program exit
             if (fgets(buffer, BUFFER_SIZE, stdin) == NULL) break;

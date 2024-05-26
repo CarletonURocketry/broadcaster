@@ -184,20 +184,6 @@ bool radio_validate_sync(const char *sync, struct lora_params_t *params) {
 }
 
 /**
- * Sets the required parameters for UART communication to work with the LoRa module.
- * @param tty The termios tty struct containing information about the tty params.
- * */
-void radio_setup_tty(struct termios *tty) {
-    cfsetispeed(tty, B57600);         // Set in speed to 57600bps
-    cfsetospeed(tty, B57600);         // Set in speed to 57600bps
-    tty->c_cc[VMIN] = 0;              // No minimum amount of bytes to read
-    tty->c_cc[VTIME] = 5;             // 0.5s before read times out
-    tty->c_lflag &= ~(ECHO | ECHONL); // No echo
-    tty->c_cflag &= ~PARENB;          // No parity
-    tty->c_cflag &= ~CSTOPB;          // Only one stop bit
-}
-
-/**
  * Set parameters on the LoRa radio.
  * @param radio_fd The file descriptor to the LoRa radio device.
  * @param params A pointer to the struct of LoRa radio parameters to be set.
