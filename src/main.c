@@ -161,6 +161,8 @@ int main(int argc, char **argv) {
 
             if (transmission_tries >= RETRY_LIMIT) {
                 fprintf(stderr, "Failed to transmit after %u tries: %s\n", transmission_tries, strerror(err));
+            } else {
+                puts("TRANSMITTED");
             }
 
         } else {

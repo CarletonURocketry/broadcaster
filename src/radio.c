@@ -305,16 +305,6 @@ int wait_for_ok(int radio_fd) {
  */
 int radio_tx(int radio_fd, const char *data) {
     int err;
-
-    if (dprintf(radio_fd, "mac pause\n") < 0) return errno; // Mac pause to not reset parameters
-    err = tcdrain(radio_fd);                                // Wait for radio to process mac pause command
-    return_err(err);
-
-    // Check that mac pause returned non-0 (success)
-    char buffer[10] = {0};
-    read(radio_fd, buffer, sizeof(buffer));
-    if (!strcmp(buffer, "0")) return false; // If 0 is the string then return false
-
     if (dprintf(radio_fd, "radio tx %s\n", data) < 0) return errno; // Transmit data
     err = tcdrain(radio_fd);                                        // Wait for radio to process transmit request
     return_err(err);
@@ -339,6 +329,5 @@ int radio_tx_bytes(int radio_fd, const uint8_t *data, size_t nbytes) {
     if (dprintf(radio_fd, "\n") < 0) return errno;
     err = tcdrain(radio_fd); // Wait for radio to process transmit request
     return_err(err);
-    puts("TRANSMITTED!");
     return wait_for_ok(radio_fd); // Return result of radio response
 }
