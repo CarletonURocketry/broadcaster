@@ -130,7 +130,7 @@ int main(int argc, char **argv) {
     /* Set radio parameters */
     uint8_t count = 0;
     int err = 0;
-    for (; err && count < RETRY_LIMIT; count++) {
+    for (; err != 0 && count < RETRY_LIMIT; count++) {
         err = radio_set_params(radio, &radio_parameters);
     }
     if (count == RETRY_LIMIT) {
@@ -144,6 +144,7 @@ int main(int argc, char **argv) {
         uint8_t transmission_tries = 0;
 
         if (from_q) {
+
             size_t nbytes;
             nbytes = mq_receive(input_q, buffer, BUFFER_SIZE, NULL);
             if (nbytes == (size_t)-1) {
@@ -151,22 +152,31 @@ int main(int argc, char **argv) {
                 // Don't quit, just continue
                 continue;
             }
-            while (transmission_tries < RETRY_LIMIT && radio_tx_bytes(radio, (uint8_t *)buffer, nbytes))
-                ; // Try 3 times
+
+            for (; transmission_tries < RETRY_LIMIT; transmission_tries++) {
+                err = radio_tx_bytes(radio, (uint8_t *)buffer, nbytes);
+                if (!err) break;
+            }
 
             if (transmission_tries >= RETRY_LIMIT) {
-                fprintf(stderr, "Failed to transmit after %u tries.\n", transmission_tries);
+                fprintf(stderr, "Failed to transmit after %u tries: %s\n", transmission_tries, strerror(err));
             }
 
         } else {
+
             // End of input stream triggers program exit
             if (fgets(buffer, BUFFER_SIZE, stdin) == NULL) break;
-            while (transmission_tries < RETRY_LIMIT && radio_tx(radio, buffer))
-                ; // Try 3 times
+
+            for (; transmission_tries < RETRY_LIMIT; transmission_tries++) {
+                err = radio_tx(radio, buffer);
+                if (!err) break;
+            }
         }
 
         // If transmission fails just log and continue
-        if (transmission_tries >= RETRY_LIMIT) fprintf(stderr, "Failed to transmit %s\n", buffer);
+        if (transmission_tries >= RETRY_LIMIT) {
+            fprintf(stderr, "Failed to transmit after %u tries: %s\n", transmission_tries, strerror(err));
+        }
     }
 
     close(radio);

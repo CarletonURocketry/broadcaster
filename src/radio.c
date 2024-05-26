@@ -200,78 +200,68 @@ int radio_set_params(int radio_fd, const struct lora_params_t *params) {
 
     int err;
 
-    err = dprintf(radio_fd, "radio set mod %s\n", MODULATIONS[params->modulation]);
-    return_err(err);
+    if (dprintf(radio_fd, "radio set mod %s\n", MODULATIONS[params->modulation]) < 0) return errno;
     err = tcdrain(radio_fd);
     return_err(err);
     err = wait_for_ok(radio_fd);
     return_err(err);
 
-    err = dprintf(radio_fd, "radio set freq %u\n", params->frequency);
-    return_err(err);
+    if (dprintf(radio_fd, "radio set freq %u\n", params->frequency) < 0) return errno;
     err = tcdrain(radio_fd);
     return_err(err);
     err = wait_for_ok(radio_fd);
     return_err(err);
 
-    err = dprintf(radio_fd, "radio set pwr %d\n", params->power);
-    return_err(err);
+    if (dprintf(radio_fd, "radio set pwr %d\n", params->power) < 0) return errno;
     err = tcdrain(radio_fd);
     return_err(err);
     err = wait_for_ok(radio_fd);
     return_err(err);
 
-    err = dprintf(radio_fd, "radio set sf sf%u\n", params->spread_factor);
-    return_err(err);
+    if (dprintf(radio_fd, "radio set sf sf%u\n", params->spread_factor) < 0) return errno;
     err = tcdrain(radio_fd);
     return_err(err);
     err = wait_for_ok(radio_fd);
     return_err(err);
 
-    err = dprintf(radio_fd, "radio set cr %s\n", CODING_RATES[params->coding_rate]);
-    return_err(err);
+    if (dprintf(radio_fd, "radio set cr %s\n", CODING_RATES[params->coding_rate]) < 0) return errno;
     err = tcdrain(radio_fd);
     return_err(err);
     err = wait_for_ok(radio_fd);
     return_err(err);
 
-    err = dprintf(radio_fd, "radio set bw %u\n", params->bandwidth);
-    return_err(err);
+    if (dprintf(radio_fd, "radio set bw %u\n", params->bandwidth) < 0) return errno;
     err = tcdrain(radio_fd);
     return_err(err);
     err = wait_for_ok(radio_fd);
     return_err(err);
 
-    err = dprintf(radio_fd, "radio set prlen %u\n", params->preamble_len);
-    return_err(err);
+    if (dprintf(radio_fd, "radio set prlen %u\n", params->preamble_len) < 0) return errno;
     err = tcdrain(radio_fd);
     return_err(err);
     err = wait_for_ok(radio_fd);
     return_err(err);
 
-    err = dprintf(radio_fd, "radio set crc %s\n", params->cyclic_redundancy ? "on" : "off");
-    return_err(err);
+    if (dprintf(radio_fd, "radio set crc %s\n", params->cyclic_redundancy ? "on" : "off") < 0) return errno;
     err = tcdrain(radio_fd);
     return_err(err);
     err = wait_for_ok(radio_fd);
     return_err(err);
 
-    err = dprintf(radio_fd, "radio set iqi %s\n", params->iqi ? "on" : "off");
-    return_err(err);
+    if (dprintf(radio_fd, "radio set iqi %s\n", params->iqi ? "on" : "off") < 0) return errno;
     err = tcdrain(radio_fd);
     return_err(err);
     err = wait_for_ok(radio_fd);
     return_err(err);
 
-    err = dprintf(radio_fd, "radio set sync %lx\n", params->sync_word);
-    return_err(err);
+    if (dprintf(radio_fd, "radio set sync %lx\n", params->sync_word) < 0) return errno;
     err = tcdrain(radio_fd);
     return_err(err);
     err = wait_for_ok(radio_fd);
     return_err(err);
 
-    err = dprintf(radio_fd, "radio set wdt 0\n"); // Turn off the watchdog so our params don't reset with inactivity
-    return_err(err);
+    // Turn off the watchdog so our params don't reset with inactivity
+    if (dprintf(radio_fd, "radio set wdt 0\n") < 0) return errno;
     err = tcdrain(radio_fd);
     return_err(err);
     err = wait_for_ok(radio_fd);
@@ -306,9 +296,8 @@ int wait_for_ok(int radio_fd) {
 int radio_tx(int radio_fd, const char *data) {
     int err;
 
-    err = dprintf(radio_fd, "mac pause\n"); // Mac pause to not reset parameters
-    return_err(err);
-    err = tcdrain(radio_fd); // Wait for radio to process mac pause command
+    if (dprintf(radio_fd, "mac pause\n") < 0) return errno; // Mac pause to not reset parameters
+    err = tcdrain(radio_fd);                                // Wait for radio to process mac pause command
     return_err(err);
 
     // Check that mac pause returned non-0 (success)
@@ -316,9 +305,8 @@ int radio_tx(int radio_fd, const char *data) {
     read(radio_fd, buffer, sizeof(buffer));
     if (!strcmp(buffer, "0")) return false; // If 0 is the string then return false
 
-    err = dprintf(radio_fd, "radio tx %s\n", data); // Transmit data
-    return_err(err);
-    err = tcdrain(radio_fd); // Wait for radio to process transmit request
+    if (dprintf(radio_fd, "radio tx %s\n", data) < 0) return errno; // Transmit data
+    err = tcdrain(radio_fd);                                        // Wait for radio to process transmit request
     return_err(err);
     return wait_for_ok(radio_fd); // Return result of radio response
 }
@@ -333,9 +321,8 @@ int radio_tx(int radio_fd, const char *data) {
 int radio_tx_bytes(int radio_fd, const uint8_t *data, size_t nbytes) {
     int err;
 
-    err = dprintf(radio_fd, "mac pause\n"); // Mac pause to not reset parameters
-    return_err(err);
-    err = tcdrain(radio_fd); // Wait for radio to process mac pause command
+    if (dprintf(radio_fd, "mac pause\n") < 0) return errno; // Mac pause to not reset parameters
+    err = tcdrain(radio_fd);                                // Wait for radio to process mac pause command
     return_err(err);
 
     // Check that mac pause returned non-0 (success)
@@ -344,14 +331,11 @@ int radio_tx_bytes(int radio_fd, const uint8_t *data, size_t nbytes) {
     if (!strcmp(buffer, "0")) return false; // If 0 is the string then return false
 
     // Send all bytes as hex
-    err = dprintf(radio_fd, "radio tx ");
-    return_err(err);
+    if (dprintf(radio_fd, "radio tx ") < 0) return errno;
     for (size_t i = 0; i < nbytes; i++) {
-        err = dprintf(radio_fd, "%02x", data[i]);
-        return_err(err);
+        if (dprintf(radio_fd, "%02x", data[i]) < 0) return errno;
     }
-    err = dprintf(radio_fd, "\n");
-    return_err(err);
+    if (dprintf(radio_fd, "\n") < 0) return errno;
     err = tcdrain(radio_fd); // Wait for radio to process transmit request
     return_err(err);
     return wait_for_ok(radio_fd); // Return result of radio response
