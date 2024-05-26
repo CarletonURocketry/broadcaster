@@ -127,6 +127,22 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
+    /* Set up device using correct UART settings. */
+    struct termios tty;
+    if (tcgetattr(radio, &tty) != 0) {
+        fprintf(stderr, "Failed to get tty attributes with error %s\n", strerror(errno));
+        close(radio);
+        exit(EXIT_FAILURE);
+    }
+
+    radio_setup_tty(&tty);
+
+    if (tcsetattr(radio, TCSANOW, &tty) != 0) {
+        fprintf(stderr, "Failed to set tty attrs with error %s\n", strerror(errno));
+        close(radio);
+        exit(EXIT_FAILURE);
+    }
+
     /* Set radio parameters */
     uint8_t count = 0;
     int err;
