@@ -267,6 +267,16 @@ int radio_set_params(int radio_fd, const struct lora_params_t *params) {
     err = wait_for_ok(radio_fd);
     return_err(err);
 
+    // Mac pause will pause for 4294967245ms, or about 49 days. So we'll only do this once.
+    if (dprintf(radio_fd, "mac pause\n") < 0) return errno; // Mac pause to not reset parameters
+    err = tcdrain(radio_fd);                                // Wait for radio to process mac pause command
+    return_err(err);
+
+    // Check that mac pause returned non-0 (success)
+    char buffer[10] = {0};
+    read(radio_fd, buffer, sizeof(buffer));
+    if (!strcmp(buffer, "0")) return EIO;
+
     return 0;
 }
 
@@ -321,15 +331,6 @@ int radio_tx(int radio_fd, const char *data) {
 int radio_tx_bytes(int radio_fd, const uint8_t *data, size_t nbytes) {
     int err;
 
-    if (dprintf(radio_fd, "mac pause\n") < 0) return errno; // Mac pause to not reset parameters
-    err = tcdrain(radio_fd);                                // Wait for radio to process mac pause command
-    return_err(err);
-
-    // Check that mac pause returned non-0 (success)
-    char buffer[10] = {0};
-    read(radio_fd, buffer, sizeof(buffer));
-    if (!strcmp(buffer, "0")) return false; // If 0 is the string then return false
-
     // Send all bytes as hex
     if (dprintf(radio_fd, "radio tx ") < 0) return errno;
     for (size_t i = 0; i < nbytes; i++) {
@@ -338,5 +339,6 @@ int radio_tx_bytes(int radio_fd, const uint8_t *data, size_t nbytes) {
     if (dprintf(radio_fd, "\n") < 0) return errno;
     err = tcdrain(radio_fd); // Wait for radio to process transmit request
     return_err(err);
+    puts("TRANSMITTED!");
     return wait_for_ok(radio_fd); // Return result of radio response
 }

@@ -129,9 +129,10 @@ int main(int argc, char **argv) {
 
     /* Set radio parameters */
     uint8_t count = 0;
-    int err = 0;
-    for (; err != 0 && count < RETRY_LIMIT; count++) {
+    int err;
+    for (; count < RETRY_LIMIT; count++) {
         err = radio_set_params(radio, &radio_parameters);
+        if (!err) break;
     }
     if (count == RETRY_LIMIT) {
         close(radio);
