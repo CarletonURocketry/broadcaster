@@ -35,7 +35,7 @@ mqd_t input_q;
  * @param message The message to be printed when validation fails. Should include a %s option for optarg.
  * */
 #define validate_param(vfunc, message)                                                                                 \
-    if (!vfunc(optarg, &radio_parameters)) {                                                                           \
+    if (vfunc(optarg, &radio_parameters)) {                                                                            \
         fprintf(stderr, message, optarg);                                                                              \
         exit(EXIT_FAILURE);                                                                                            \
     }
@@ -123,17 +123,18 @@ int main(int argc, char **argv) {
     /* Open radio for reading and writing. */
     int radio = open(serial_port, O_RDWR | O_NDELAY | O_NOCTTY);
     if (radio == -1) {
-        fprintf(stderr, "Could not open tty with error %d\n.", radio);
+        fprintf(stderr, "Could not open tty with error %s\n.", strerror(errno));
         exit(EXIT_FAILURE);
     }
 
     /* Set radio parameters */
     uint8_t count = 0;
-    for (; !radio_set_params(radio, &radio_parameters) && count < RETRY_LIMIT; count++)
+    int err = 0;
+    for (; (err = radio_set_params(radio, &radio_parameters)) && count < RETRY_LIMIT; count++)
         ;
     if (count == RETRY_LIMIT) {
         close(radio);
-        fprintf(stderr, "Failed to set radio parameters\n");
+        fprintf(stderr, "Failed to set radio parameters: %s\n", strerror(err));
     }
 
     /* Read input stream data line by line. */
@@ -149,7 +150,7 @@ int main(int argc, char **argv) {
                 // Don't quit, just continue
                 continue;
             }
-            while (transmission_tries < RETRY_LIMIT && !radio_tx_bytes(radio, (uint8_t *)buffer, nbytes))
+            while (transmission_tries < RETRY_LIMIT && radio_tx_bytes(radio, (uint8_t *)buffer, nbytes))
                 ; // Try 3 times
 
             if (transmission_tries >= RETRY_LIMIT) {
@@ -159,7 +160,7 @@ int main(int argc, char **argv) {
         } else {
             // End of input stream triggers program exit
             if (fgets(buffer, BUFFER_SIZE, stdin) == NULL) break;
-            while (transmission_tries < RETRY_LIMIT && !radio_tx(radio, buffer))
+            while (transmission_tries < RETRY_LIMIT && radio_tx(radio, buffer))
                 ; // Try 3 times
         }
 
