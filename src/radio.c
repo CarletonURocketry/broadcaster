@@ -9,15 +9,22 @@
  * and validating them.
  */
 #include "radio.h"
+#include <devctl.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <ioctl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <termios.h>
 #include <unistd.h>
 
+/** Macro to calculate compile time array length. */
 #define array_len(a) (sizeof(a) / sizeof(a[0]))
+
+/** Macro to early return errors. */
+#define return_err(err)                                                                                                \
+    if (err != EOK) return err;
 
 /** Actual value representation of radio parameters. */
 static const char *MODULATIONS[] = {[LORA] = "lora", [FSK] = "fsk"};
@@ -138,7 +145,7 @@ bool radio_validate_cr(const char *coding_rate, struct lora_params_t *params) {
  * @param prlen The command line argument for preamble length.
  * @param params The LoRa parameters to be updated.
  * @return True if the preamble length was valid and has been set in the params, false otherwise.
- * */
+ */
 bool radio_validate_prlen(const char *prlen, struct lora_params_t *params) {
     char *end;
     uint16_t prlen_p = strtoul(prlen, &end, 10);
@@ -153,7 +160,7 @@ bool radio_validate_prlen(const char *prlen, struct lora_params_t *params) {
  * @param bandwidth The command line argument for bandwidth.
  * @param params The LoRa parameters to be updated.
  * @return True if the bandwidth was valid and has been set in the params, false otherwise.
- * */
+ */
 bool radio_validate_bw(const char *bandwidth, struct lora_params_t *params) {
     char *end;
     uint16_t bw_p = strtoul(bandwidth, &end, 10);
@@ -189,43 +196,77 @@ bool radio_validate_sync(const char *sync, struct lora_params_t *params) {
  * @param params A pointer to the struct of LoRa radio parameters to be set.
  * @return True if successful, false if any parameter fails to be set.
  * */
-bool radio_set_params(int radio_fd, const struct lora_params_t *params) {
+int radio_set_params(int radio_fd, const struct lora_params_t *params) {
 
-    dprintf(radio_fd, "radio set mod %s\n", MODULATIONS[params->modulation]);
-    tcdrain(radio_fd);
-    if (!wait_for_ok(radio_fd)) return false;
-    dprintf(radio_fd, "radio set freq %u\n", params->frequency);
-    tcdrain(radio_fd);
-    if (!wait_for_ok(radio_fd)) return false;
-    dprintf(radio_fd, "radio set pwr %d\n", params->power);
-    tcdrain(radio_fd);
-    if (!wait_for_ok(radio_fd)) return false;
-    dprintf(radio_fd, "radio set sf sf%u\n", params->spread_factor);
-    tcdrain(radio_fd);
-    if (!wait_for_ok(radio_fd)) return false;
-    dprintf(radio_fd, "radio set cr %s\n", CODING_RATES[params->coding_rate]);
-    tcdrain(radio_fd);
-    if (!wait_for_ok(radio_fd)) return false;
-    dprintf(radio_fd, "radio set bw %u\n", params->bandwidth);
-    tcdrain(radio_fd);
-    if (!wait_for_ok(radio_fd)) return false;
-    dprintf(radio_fd, "radio set prlen %u\n", params->preamble_len);
-    tcdrain(radio_fd);
-    if (!wait_for_ok(radio_fd)) return false;
-    dprintf(radio_fd, "radio set crc %s\n", params->cyclic_redundancy ? "on" : "off");
-    tcdrain(radio_fd);
-    if (!wait_for_ok(radio_fd)) return false;
-    dprintf(radio_fd, "radio set iqi %s\n", params->iqi ? "on" : "off");
-    tcdrain(radio_fd);
-    if (!wait_for_ok(radio_fd)) return false;
-    dprintf(radio_fd, "radio set sync %lx\n", params->sync_word);
-    tcdrain(radio_fd);
-    if (!wait_for_ok(radio_fd)) return false;
-    dprintf(radio_fd, "radio set wdt 0\n"); // Turn off the watchdog so our params don't reset with inactivity
-    tcdrain(radio_fd);
+    int err;
+
+    err = dprintf(radio_fd, "radio set mod %s\n", MODULATIONS[params->modulation]);
+    return_err(err);
+    err = tcdrain(radio_fd);
+    return_err(err);
     if (!wait_for_ok(radio_fd)) return false;
 
-    return true;
+    err = dprintf(radio_fd, "radio set freq %u\n", params->frequency);
+    return_err(err);
+    err = tcdrain(radio_fd);
+    return_err(err);
+    if (!wait_for_ok(radio_fd)) return false;
+
+    err = dprintf(radio_fd, "radio set pwr %d\n", params->power);
+    return_err(err);
+    err = tcdrain(radio_fd);
+    return_err(err);
+    if (!wait_for_ok(radio_fd)) return false;
+
+    err = dprintf(radio_fd, "radio set sf sf%u\n", params->spread_factor);
+    return_err(err);
+    err = tcdrain(radio_fd);
+    return_err(err);
+    if (!wait_for_ok(radio_fd)) return false;
+
+    err = dprintf(radio_fd, "radio set cr %s\n", CODING_RATES[params->coding_rate]);
+    return_err(err);
+    err = tcdrain(radio_fd);
+    return_err(err);
+    if (!wait_for_ok(radio_fd)) return false;
+
+    err = dprintf(radio_fd, "radio set bw %u\n", params->bandwidth);
+    return_err(err);
+    err = tcdrain(radio_fd);
+    return_err(err);
+    if (!wait_for_ok(radio_fd)) return false;
+
+    err = dprintf(radio_fd, "radio set prlen %u\n", params->preamble_len);
+    return_err(err);
+    err = tcdrain(radio_fd);
+    return_err(err);
+    if (!wait_for_ok(radio_fd)) return false;
+
+    err = dprintf(radio_fd, "radio set crc %s\n", params->cyclic_redundancy ? "on" : "off");
+    return_err(err);
+    err = tcdrain(radio_fd);
+    return_err(err);
+    if (!wait_for_ok(radio_fd)) return false;
+
+    err = dprintf(radio_fd, "radio set iqi %s\n", params->iqi ? "on" : "off");
+    return_err(err);
+    err = tcdrain(radio_fd);
+    return_err(err);
+    if (!wait_for_ok(radio_fd)) return false;
+
+    err = dprintf(radio_fd, "radio set sync %lx\n", params->sync_word);
+    return_err(err);
+    err = tcdrain(radio_fd);
+    return_err(err);
+    if (!wait_for_ok(radio_fd)) return false;
+
+    err = dprintf(radio_fd, "radio set wdt 0\n"); // Turn off the watchdog so our params don't reset with inactivity
+    return_err(err);
+    err = tcdrain(radio_fd);
+    return_err(err);
+    if (!wait_for_ok(radio_fd)) return false;
+
+    return 0;
 }
 
 /**

@@ -63,7 +63,7 @@ bool radio_validate_sync(const char *sync, struct lora_params_t *params);
 
 /* RADIO SETUP. */
 void radio_setup_tty(struct termios *tty);
-bool radio_set_params(int radio_fd, const struct lora_params_t *params);
+int radio_set_params(int radio_fd, const struct lora_params_t *params);
 
 /* RADIO COMMUNICATION */
 bool wait_for_ok(int radio_fd);
