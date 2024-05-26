@@ -334,13 +334,17 @@ int radio_tx(int radio_fd, const char *data) {
  */
 int radio_tx_bytes(int radio_fd, const uint8_t *data, size_t nbytes) {
     int err;
+    int sent = 0;
 
-    // Send all bytes as hex
-    if (dprintf(radio_fd, "radio tx ") < 0) return errno;
+    char buffer[550];
+    sent += sprintf(&buffer[sent], "radio tx ");
     for (size_t i = 0; i < nbytes; i++) {
-        if (dprintf(radio_fd, "%02x", data[i]) < 0) return errno;
+        sent += sprintf(&buffer[sent], "%02x", data[i]);
     }
-    if (dprintf(radio_fd, "\n") < 0) return errno;
+    sent += sprintf(&buffer[sent], "\n");
+    buffer[sent] = '\0';
+
+    write(radio_fd, buffer, sent);
     err = tcdrain(radio_fd); // Wait for radio to process transmit request
     return_err(err);
     return wait_for_ok(radio_fd); // Return result of radio response
