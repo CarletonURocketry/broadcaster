@@ -12,13 +12,13 @@
 /** The read buffer size for incoming data.
  * Since no radio packet can be greater than 512 bytes, and data is provided in ASCII encoding for hex symbols, one byte
  * of data will be one ASCII hex character. So a 512 character buffer is sufficient for all packet sizes. */
-#define BUFFER_SIZE 512
+#define BUFFER_SIZE 600
 
 /** How many times broadcaster will attempt to transmit a packet before giving up. */
 #define RETRY_LIMIT 3
 
 /** The name of the message queue to read input from. */
-#define IN_QUEUE "packager-out"
+#define IN_QUEUE "plogger-out"
 
 /** The read buffer for input. */
 char buffer[BUFFER_SIZE];
@@ -177,8 +177,6 @@ int main(int argc, char **argv) {
 
             if (transmission_tries >= RETRY_LIMIT) {
                 fprintf(stderr, "Failed to transmit after %u tries: %s\n", transmission_tries, strerror(err));
-            } else {
-                puts("TRANSMITTED");
             }
 
         } else {
