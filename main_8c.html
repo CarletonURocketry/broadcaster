@@ -94,11 +94,11 @@ $(function() {
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:a6b20d41d6252e9871430c242cb1a56e7"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="main_8c.html#a6b20d41d6252e9871430c242cb1a56e7">BUFFER_SIZE</a>&#160;&#160;&#160;512</td></tr>
+<tr class="memitem:a6b20d41d6252e9871430c242cb1a56e7"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="main_8c.html#a6b20d41d6252e9871430c242cb1a56e7">BUFFER_SIZE</a>&#160;&#160;&#160;600</td></tr>
 <tr class="separator:a6b20d41d6252e9871430c242cb1a56e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad4eba3b0ea03f397bae8792d0f0e4cd4"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="main_8c.html#ad4eba3b0ea03f397bae8792d0f0e4cd4">RETRY_LIMIT</a>&#160;&#160;&#160;3</td></tr>
 <tr class="separator:ad4eba3b0ea03f397bae8792d0f0e4cd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af0411b67a2dba87758fee4f77c888558"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="main_8c.html#af0411b67a2dba87758fee4f77c888558">IN_QUEUE</a>&#160;&#160;&#160;&quot;packager-out&quot;</td></tr>
+<tr class="memitem:af0411b67a2dba87758fee4f77c888558"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="main_8c.html#af0411b67a2dba87758fee4f77c888558">IN_QUEUE</a>&#160;&#160;&#160;&quot;plogger-out&quot;</td></tr>
 <tr class="separator:af0411b67a2dba87758fee4f77c888558"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a18fd22b406401357523a9d66220e6571"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="main_8c.html#a18fd22b406401357523a9d66220e6571">validate_param</a>(vfunc,  message)</td></tr>
 <tr class="separator:a18fd22b406401357523a9d66220e6571"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -116,6 +116,10 @@ Variables</h2></td></tr>
 <tr class="separator:a2e200991063e6ea86174a4822b3421f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a27719cd8ae7f31f261a75535499776da"><td class="memItemLeft" align="right" valign="top">mqd_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="main_8c.html#a27719cd8ae7f31f261a75535499776da">input_q</a></td></tr>
 <tr class="separator:a27719cd8ae7f31f261a75535499776da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa07302a9f1b3dd51f6d44ab2c34060a2"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="main_8c.html#aa07302a9f1b3dd51f6d44ab2c34060a2">serial_port</a> = NULL</td></tr>
+<tr class="separator:aa07302a9f1b3dd51f6d44ab2c34060a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a44a93d90b9a891dbeaed7ad99f2f7e1d"><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="structlora__params__t.html">lora_params_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="main_8c.html#a44a93d90b9a891dbeaed7ad99f2f7e1d">radio_parameters</a></td></tr>
+<tr class="separator:a44a93d90b9a891dbeaed7ad99f2f7e1d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
 <a id="a6b20d41d6252e9871430c242cb1a56e7" name="a6b20d41d6252e9871430c242cb1a56e7"></a>
@@ -125,7 +129,7 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define BUFFER_SIZE&#160;&#160;&#160;512</td>
+          <td class="memname">#define BUFFER_SIZE&#160;&#160;&#160;600</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -140,7 +144,7 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define IN_QUEUE&#160;&#160;&#160;&quot;packager-out&quot;</td>
+          <td class="memname">#define IN_QUEUE&#160;&#160;&#160;&quot;plogger-out&quot;</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -188,10 +192,11 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">    <span class="keywordflow">if</span> (!vfunc(optarg, &amp;radio_parameters)) {                                                                           \</div>
+<b>Value:</b><div class="fragment"><div class="line">    <span class="keywordflow">if</span> (vfunc(optarg, &amp;<a class="code hl_variable" href="main_8c.html#a44a93d90b9a891dbeaed7ad99f2f7e1d">radio_parameters</a>)) {                                                                            \</div>
 <div class="line">        fprintf(stderr, message, optarg);                                                                              \</div>
 <div class="line">        exit(EXIT_FAILURE);                                                                                            \</div>
 <div class="line">    }</div>
+<div class="ttc" id="amain_8c_html_a44a93d90b9a891dbeaed7ad99f2f7e1d"><div class="ttname"><a href="main_8c.html#a44a93d90b9a891dbeaed7ad99f2f7e1d">radio_parameters</a></div><div class="ttdeci">struct lora_params_t radio_parameters</div><div class="ttdef"><b>Definition:</b> main.c:47</div></div>
 </div><!-- fragment --><p >A macro for exiting with a failure when validation fails. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">vfunc</td><td>The validation function, which should take optarg and radio_parameters as parameters. </td></tr>
@@ -274,6 +279,48 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p >Input message queue file descriptor. </p>
+
+</div>
+</div>
+<a id="a44a93d90b9a891dbeaed7ad99f2f7e1d" name="a44a93d90b9a891dbeaed7ad99f2f7e1d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a44a93d90b9a891dbeaed7ad99f2f7e1d">&#9670;&#160;</a></span>radio_parameters</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct <a class="el" href="structlora__params__t.html">lora_params_t</a> radio_parameters</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Initial value:</b><div class="fragment"><div class="line">= {.modulation = <a class="code hl_enumvalue" href="radio_8h.html#a22e5da42c3350892b86104c516865de2a082b1eaa6386e5c3c0204226b4824c07">LORA</a>,</div>
+<div class="line">                                         .frequency = 433050000,</div>
+<div class="line">                                         .power = 15,</div>
+<div class="line">                                         .spread_factor = 7,</div>
+<div class="line">                                         .coding_rate = <a class="code hl_enumvalue" href="radio_8h.html#a6e6bd8a7bb148453310b1d83c25a6c53afaec525569c1f205b98228986604a943">CR_4_7</a>,</div>
+<div class="line">                                         .bandwidth = 500,</div>
+<div class="line">                                         .preamble_len = 6,</div>
+<div class="line">                                         .cyclic_redundancy = <span class="keyword">true</span>,</div>
+<div class="line">                                         .iqi = <span class="keyword">false</span>,</div>
+<div class="line">                                         .sync_word = 0x43}</div>
+<div class="ttc" id="aradio_8h_html_a22e5da42c3350892b86104c516865de2a082b1eaa6386e5c3c0204226b4824c07"><div class="ttname"><a href="radio_8h.html#a22e5da42c3350892b86104c516865de2a082b1eaa6386e5c3c0204226b4824c07">LORA</a></div><div class="ttdeci">@ LORA</div><div class="ttdef"><b>Definition:</b> radio.h:18</div></div>
+<div class="ttc" id="aradio_8h_html_a6e6bd8a7bb148453310b1d83c25a6c53afaec525569c1f205b98228986604a943"><div class="ttname"><a href="radio_8h.html#a6e6bd8a7bb148453310b1d83c25a6c53afaec525569c1f205b98228986604a943">CR_4_7</a></div><div class="ttdeci">@ CR_4_7</div><div class="ttdef"><b>Definition:</b> radio.h:26</div></div>
+</div><!-- fragment --><p >The default radio parameters. </p>
+
+</div>
+</div>
+<a id="aa07302a9f1b3dd51f6d44ab2c34060a2" name="aa07302a9f1b3dd51f6d44ab2c34060a2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa07302a9f1b3dd51f6d44ab2c34060a2">&#9670;&#160;</a></span>serial_port</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char* serial_port = NULL</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p >The device name of the serial port connected to the LoRa radio. </p>
 
 </div>
 </div>
