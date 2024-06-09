@@ -9,15 +9,22 @@
  * and validating them.
  */
 #include "radio.h"
+#include <devctl.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <ioctl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <termios.h>
 #include <unistd.h>
 
+/** Macro to calculate compile time array length. */
 #define array_len(a) (sizeof(a) / sizeof(a[0]))
+
+/** Macro to early return errors. */
+#define return_err(err)                                                                                                \
+    if (err != EOK) return err;
 
 /** Actual value representation of radio parameters. */
 static const char *MODULATIONS[] = {[LORA] = "lora", [FSK] = "fsk"};
@@ -55,106 +62,106 @@ static const uint16_t BANDWIDTHS[] = {125, 250, 500};
  * Validates and sets a command line argument for modulation.
  * @param mod The command line argument for modulation.
  * @param params The LoRa parameters to be updated.
- * @return True if the modulation was valid and has been set in the params, false otherwise.
- * */
-bool radio_validate_mod(const char *mod, struct lora_params_t *params) {
+ * @return 0 if valid, EINVAL if invalid.
+ */
+int radio_validate_mod(const char *mod, struct lora_params_t *params) {
     for (uint8_t i = 0; i < array_len(MODULATIONS); i++) {
         if (!strcmp(mod, MODULATIONS[i])) {
             params->modulation = (Modulation)i;
-            return true;
+            return 0;
         }
     }
-    return false;
+    return EINVAL;
 }
 
 /**
  * Validates and sets a command line argument for frequency.
  * @param freq The command line argument for frequency.
  * @param params The LoRa parameters to be updated.
- * @return True if the frequency was valid and has been set in the params, false otherwise.
- * */
-bool radio_validate_freq(const char *freq, struct lora_params_t *params) {
+ * @return 0 if valid, EINVAL if invalid.
+ */
+int radio_validate_freq(const char *freq, struct lora_params_t *params) {
     char *end;
     uint32_t p_freq = strtoul(freq, &end, 10);
-    if (errno || freq == end) return false; // Call failed
+    if (errno || freq == end) return EINVAL;
 
     if (!(LL_FREQ <= p_freq && p_freq <= LH_FREQ) && !(HL_FREQ <= p_freq && p_freq <= HH_FREQ)) return false;
 
     params->frequency = p_freq;
-    return true;
+    return 0;
 }
 
 /**
  * Validates and sets a command line argument for power.
  * @param pwr The command line argument for power.
  * @param params The LoRa parameters to be updated.
- * @return True if the power was valid and has been set in the params, false otherwise.
- * */
-bool radio_validate_pwr(const char *power, struct lora_params_t *params) {
+ * @return 0 if valid, EINVAL if invalid.
+ */
+int radio_validate_pwr(const char *power, struct lora_params_t *params) {
     int8_t power_p = atoi(power);
     if (L_PWR <= power_p && power_p <= H_PWR) {
         params->power = power_p;
-        return true;
+        return 0;
     }
-    return false;
+    return EINVAL;
 }
 
 /**
  * Validates and sets a command line argument for spread factor.
  * @param sf The command line argument for spread factor.
  * @param params The LoRa parameters to be updated.
- * @return True if the spread factor was valid and has been set in the params, false otherwise.
- * */
-bool radio_validate_sf(const char *sf, struct lora_params_t *params) {
+ * @return 0 if valid, EINVAL if invalid.
+ */
+int radio_validate_sf(const char *sf, struct lora_params_t *params) {
     char *end;
     uint8_t sf_p = strtoul(sf, &end, 10);
-    if (errno || sf == end) return false; // Call failed
+    if (errno || sf == end) return EINVAL;
 
     if (L_SF <= sf_p && sf_p <= H_SF) {
         params->spread_factor = sf_p;
-        return true;
+        return 0;
     }
-    return false;
+    return EINVAL;
 }
 
 /**
  * Validates and sets a command line argument for coding rate.
  * @param coding_rate The command line argument for coding rate.
  * @param params The LoRa parameters to be updated.
- * @return True if the coding rate was valid and has been set in the params, false otherwise.
- * */
-bool radio_validate_cr(const char *coding_rate, struct lora_params_t *params) {
+ * @return 0 if valid, EINVAL if invalid.
+ */
+int radio_validate_cr(const char *coding_rate, struct lora_params_t *params) {
     for (uint8_t i = 0; i < array_len(CODING_RATES); i++) {
         if (!strcmp(coding_rate, CODING_RATES[i])) {
             params->coding_rate = (CodingRate)i;
-            return true;
+            return 0;
         }
     }
-    return false;
+    return EINVAL;
 }
 
 /**
  * Validates and sets a command line argument for preamble length.
  * @param prlen The command line argument for preamble length.
  * @param params The LoRa parameters to be updated.
- * @return True if the preamble length was valid and has been set in the params, false otherwise.
- * */
-bool radio_validate_prlen(const char *prlen, struct lora_params_t *params) {
+ * @return 0 if valid, EINVAL if invalid.
+ */
+int radio_validate_prlen(const char *prlen, struct lora_params_t *params) {
     char *end;
     uint16_t prlen_p = strtoul(prlen, &end, 10);
-    if (errno || prlen == end) return false; // Call failed
+    if (errno || prlen == end) return EINVAL;
 
     params->preamble_len = prlen_p;
-    return true;
+    return 0;
 }
 
 /**
  * Validates and sets a command line argument for bandwidth.
  * @param bandwidth The command line argument for bandwidth.
  * @param params The LoRa parameters to be updated.
- * @return True if the bandwidth was valid and has been set in the params, false otherwise.
- * */
-bool radio_validate_bw(const char *bandwidth, struct lora_params_t *params) {
+ * @return 0 if valid, EINVAL if invalid.
+ */
+int radio_validate_bw(const char *bandwidth, struct lora_params_t *params) {
     char *end;
     uint16_t bw_p = strtoul(bandwidth, &end, 10);
     if (errno || bandwidth == end) return false; // Call failed
@@ -163,30 +170,30 @@ bool radio_validate_bw(const char *bandwidth, struct lora_params_t *params) {
     for (uint8_t i = 0; i < array_len(BANDWIDTHS); i++) {
         if (bw_p == BANDWIDTHS[i]) {
             params->bandwidth = bw_p;
-            return true;
+            return EINVAL;
         }
     }
-    return false;
+    return 0;
 }
 
 /**
  * Validates and sets a command line argument for sync word.
  * @param sync The command line argument for sync word.
  * @param params The LoRa parameters to be updated.
- * @return True if the sync word was valid and has been set in the params, false otherwise.
- * */
-bool radio_validate_sync(const char *sync, struct lora_params_t *params) {
+ * @return 0 if valid, EINVAL if invalid.
+ */
+int radio_validate_sync(const char *sync, struct lora_params_t *params) {
     char *end;
     uint64_t sync_p = strtoul(sync, &end, 10);
-    if (errno || sync == end) return false; // Call failed
+    if (errno || sync == end) return EINVAL;
     params->sync_word = sync_p;
-    return true;
+    return 0;
 }
 
 /**
  * Sets the required parameters for UART communication to work with the LoRa module.
  * @param tty The termios tty struct containing information about the tty params.
- * */
+ */
 void radio_setup_tty(struct termios *tty) {
     cfsetispeed(tty, B57600);         // Set in speed to 57600bps
     cfsetospeed(tty, B57600);         // Set in speed to 57600bps
@@ -201,83 +208,121 @@ void radio_setup_tty(struct termios *tty) {
  * Set parameters on the LoRa radio.
  * @param radio_fd The file descriptor to the LoRa radio device.
  * @param params A pointer to the struct of LoRa radio parameters to be set.
- * @return True if successful, false if any parameter fails to be set.
- * */
-bool radio_set_params(int radio_fd, const struct lora_params_t *params) {
+ * @return 0 if successful, otherwise the type of error that occurred.
+ */
+int radio_set_params(int radio_fd, const struct lora_params_t *params) {
 
-    dprintf(radio_fd, "radio set mod %s\n", MODULATIONS[params->modulation]);
-    tcdrain(radio_fd);
-    if (!wait_for_ok(radio_fd)) return false;
-    dprintf(radio_fd, "radio set freq %u\n", params->frequency);
-    tcdrain(radio_fd);
-    if (!wait_for_ok(radio_fd)) return false;
-    dprintf(radio_fd, "radio set pwr %d\n", params->power);
-    tcdrain(radio_fd);
-    if (!wait_for_ok(radio_fd)) return false;
-    dprintf(radio_fd, "radio set sf sf%u\n", params->spread_factor);
-    tcdrain(radio_fd);
-    if (!wait_for_ok(radio_fd)) return false;
-    dprintf(radio_fd, "radio set cr %s\n", CODING_RATES[params->coding_rate]);
-    tcdrain(radio_fd);
-    if (!wait_for_ok(radio_fd)) return false;
-    dprintf(radio_fd, "radio set bw %u\n", params->bandwidth);
-    tcdrain(radio_fd);
-    if (!wait_for_ok(radio_fd)) return false;
-    dprintf(radio_fd, "radio set prlen %u\n", params->preamble_len);
-    tcdrain(radio_fd);
-    if (!wait_for_ok(radio_fd)) return false;
-    dprintf(radio_fd, "radio set crc %s\n", params->cyclic_redundancy ? "on" : "off");
-    tcdrain(radio_fd);
-    if (!wait_for_ok(radio_fd)) return false;
-    dprintf(radio_fd, "radio set iqi %s\n", params->iqi ? "on" : "off");
-    tcdrain(radio_fd);
-    if (!wait_for_ok(radio_fd)) return false;
-    dprintf(radio_fd, "radio set sync %lx\n", params->sync_word);
-    tcdrain(radio_fd);
-    if (!wait_for_ok(radio_fd)) return false;
-    dprintf(radio_fd, "radio set wdt 0\n"); // Turn off the watchdog so our params don't reset with inactivity
-    tcdrain(radio_fd);
-    if (!wait_for_ok(radio_fd)) return false;
+    int err;
 
-    return true;
+    if (dprintf(radio_fd, "radio set mod %s\n", MODULATIONS[params->modulation]) < 0) return errno;
+    err = tcdrain(radio_fd);
+    return_err(err);
+    err = wait_for_ok(radio_fd);
+    return_err(err);
+
+    if (dprintf(radio_fd, "radio set freq %u\n", params->frequency) < 0) return errno;
+    err = tcdrain(radio_fd);
+    return_err(err);
+    err = wait_for_ok(radio_fd);
+    return_err(err);
+
+    if (dprintf(radio_fd, "radio set pwr %d\n", params->power) < 0) return errno;
+    err = tcdrain(radio_fd);
+    return_err(err);
+    err = wait_for_ok(radio_fd);
+    return_err(err);
+
+    if (dprintf(radio_fd, "radio set sf sf%u\n", params->spread_factor) < 0) return errno;
+    err = tcdrain(radio_fd);
+    return_err(err);
+    err = wait_for_ok(radio_fd);
+    return_err(err);
+
+    if (dprintf(radio_fd, "radio set cr %s\n", CODING_RATES[params->coding_rate]) < 0) return errno;
+    err = tcdrain(radio_fd);
+    return_err(err);
+    err = wait_for_ok(radio_fd);
+    return_err(err);
+
+    if (dprintf(radio_fd, "radio set bw %u\n", params->bandwidth) < 0) return errno;
+    err = tcdrain(radio_fd);
+    return_err(err);
+    err = wait_for_ok(radio_fd);
+    return_err(err);
+
+    if (dprintf(radio_fd, "radio set prlen %u\n", params->preamble_len) < 0) return errno;
+    err = tcdrain(radio_fd);
+    return_err(err);
+    err = wait_for_ok(radio_fd);
+    return_err(err);
+
+    if (dprintf(radio_fd, "radio set crc %s\n", params->cyclic_redundancy ? "on" : "off") < 0) return errno;
+    err = tcdrain(radio_fd);
+    return_err(err);
+    err = wait_for_ok(radio_fd);
+    return_err(err);
+
+    if (dprintf(radio_fd, "radio set iqi %s\n", params->iqi ? "on" : "off") < 0) return errno;
+    err = tcdrain(radio_fd);
+    return_err(err);
+    err = wait_for_ok(radio_fd);
+    return_err(err);
+
+    if (dprintf(radio_fd, "radio set sync %lx\n", params->sync_word) < 0) return errno;
+    err = tcdrain(radio_fd);
+    return_err(err);
+    err = wait_for_ok(radio_fd);
+    return_err(err);
+
+    // Turn off the watchdog so our params don't reset with inactivity
+    if (dprintf(radio_fd, "radio set wdt 0\n") < 0) return errno;
+    err = tcdrain(radio_fd);
+    return_err(err);
+    err = wait_for_ok(radio_fd);
+    return_err(err);
+
+    // Mac pause will pause for 4294967245ms, or about 49 days. So we'll only do this once.
+    if (dprintf(radio_fd, "mac pause\n") < 0) return errno; // Mac pause to not reset parameters
+    err = tcdrain(radio_fd);                                // Wait for radio to process mac pause command
+    return_err(err);
+
+    // Check that mac pause returned non-0 (success)
+    char buffer[10] = {0};
+    read(radio_fd, buffer, sizeof(buffer));
+    if (!strcmp(buffer, "0")) return EIO;
+
+    return 0;
 }
 
 /**
  * Wait for the LoRa radio module to respond with "ok".
  * @param radio_fd The file descriptor to the LoRa radio device.
- * @return True if ok was the response, false if no response in time or different response.
- * */
-bool wait_for_ok(int radio_fd) {
+ * @return 0 if The radio responded with an okay status, otherwise return error that occurred.
+ */
+int wait_for_ok(int radio_fd) {
     char buffer[25] = {0};
     for (uint8_t i = 0; i < 3; i++) {
         read(radio_fd, buffer, sizeof(buffer));
         if (strstr(buffer, "ok") != NULL) {
-            tcflush(radio_fd, TCIFLUSH);
-            return true;
+            return tcflush(radio_fd, TCIFLUSH);
         }
         memset(buffer, 0, sizeof(buffer));
     }
-    return false;
+    return EIO;
 }
 
 /**
  * Transmits the passed data over LoRa radio.
  * @param radio_fd The file descriptor to the LoRa radio device.
  * @param data A pointer to the data to be sent over radio.
- * @return True if the data was transmitted successfully, false otherwise.
+ * @return 0 if transmission was successful, otherwise return the error that occurred.
  */
-bool radio_tx(int radio_fd, const char *data) {
-    dprintf(radio_fd, "mac pause\n"); // Mac pause to not reset parameters
-    tcdrain(radio_fd);                // Wait for radio to process mac pause command
-
-    // Check that mac pause returned non-0 (success)
-    char buffer[10] = {0};
-    read(radio_fd, buffer, sizeof(buffer));
-    if (!strcmp(buffer, "0")) return false; // If 0 is the string then return false
-
-    dprintf(radio_fd, "radio tx %s\n", data); // Transmit data
-    tcdrain(radio_fd);                        // Wait for radio to process transmit request
-    return wait_for_ok(radio_fd);             // Return result of radio response
+int radio_tx(int radio_fd, const char *data) {
+    int err;
+    if (dprintf(radio_fd, "radio tx %s\n", data) < 0) return errno; // Transmit data
+    err = tcdrain(radio_fd);                                        // Wait for radio to process transmit request
+    return_err(err);
+    return wait_for_ok(radio_fd); // Return result of radio response
 }
 
 /**
@@ -285,23 +330,22 @@ bool radio_tx(int radio_fd, const char *data) {
  * @param radio_fd The file descriptor to the LoRa radio device.
  * @param data A pointer to the data to be sent over radio.
  * @param nbytes The number of bytes in the `data` pointer to transmit.
- * @return True if the data was transmitted successfully, false otherwise.
+ * @return 0 if transmission was successful, otherwise return the error that occurred.
  */
-bool radio_tx_bytes(int radio_fd, const uint8_t *data, size_t nbytes) {
-    dprintf(radio_fd, "mac pause\n"); // Mac pause to not reset parameters
-    tcdrain(radio_fd);                // Wait for radio to process mac pause command
+int radio_tx_bytes(int radio_fd, const uint8_t *data, size_t nbytes) {
+    int err;
+    int sent = 0;
 
-    // Check that mac pause returned non-0 (success)
-    char buffer[10] = {0};
-    read(radio_fd, buffer, sizeof(buffer));
-    if (!strcmp(buffer, "0")) return false; // If 0 is the string then return false
-
-    // Send all bytes as hex
-    dprintf(radio_fd, "radio tx ");
+    char buffer[550];
+    sent += sprintf(&buffer[sent], "radio tx ");
     for (size_t i = 0; i < nbytes; i++) {
-        dprintf(radio_fd, "%02x", data[i]);
+        sent += sprintf(&buffer[sent], "%02x", data[i]);
     }
-    dprintf(radio_fd, "\n");
-    tcdrain(radio_fd);            // Wait for radio to process transmit request
+    sent += sprintf(&buffer[sent], "\n");
+    buffer[sent] = '\0';
+
+    write(radio_fd, buffer, sent);
+    err = tcdrain(radio_fd); // Wait for radio to process transmit request
+    return_err(err);
     return wait_for_ok(radio_fd); // Return result of radio response
 }

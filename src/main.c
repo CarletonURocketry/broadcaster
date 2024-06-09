@@ -12,13 +12,13 @@
 /** The read buffer size for incoming data.
  * Since no radio packet can be greater than 512 bytes, and data is provided in ASCII encoding for hex symbols, one byte
  * of data will be one ASCII hex character. So a 512 character buffer is sufficient for all packet sizes. */
-#define BUFFER_SIZE 512
+#define BUFFER_SIZE 600
 
 /** How many times broadcaster will attempt to transmit a packet before giving up. */
 #define RETRY_LIMIT 3
 
 /** The name of the message queue to read input from. */
-#define IN_QUEUE "packager-out"
+#define IN_QUEUE "plogger-out"
 
 /** The read buffer for input. */
 char buffer[BUFFER_SIZE];
@@ -35,7 +35,7 @@ mqd_t input_q;
  * @param message The message to be printed when validation fails. Should include a %s option for optarg.
  * */
 #define validate_param(vfunc, message)                                                                                 \
-    if (!vfunc(optarg, &radio_parameters)) {                                                                           \
+    if (vfunc(optarg, &radio_parameters)) {                                                                            \
         fprintf(stderr, message, optarg);                                                                              \
         exit(EXIT_FAILURE);                                                                                            \
     }
@@ -45,15 +45,15 @@ char *serial_port = NULL;
 
 /** The default radio parameters. */
 struct lora_params_t radio_parameters = {.modulation = LORA,
-                                                .frequency = 433050000,
-                                                .power = 15,
-                                                .spread_factor = 7,
-                                                .coding_rate = CR_4_7,
-                                                .bandwidth = 500,
-                                                .preamble_len = 6,
-                                                .cyclic_redundancy = true,
-                                                .iqi = false,
-                                                .sync_word = 0x43};
+                                         .frequency = 433050000,
+                                         .power = 15,
+                                         .spread_factor = 7,
+                                         .coding_rate = CR_4_7,
+                                         .bandwidth = 500,
+                                         .preamble_len = 6,
+                                         .cyclic_redundancy = true,
+                                         .iqi = false,
+                                         .sync_word = 0x43};
 
 int main(int argc, char **argv) {
 
@@ -123,14 +123,14 @@ int main(int argc, char **argv) {
     /* Open radio for reading and writing. */
     int radio = open(serial_port, O_RDWR | O_NDELAY | O_NOCTTY);
     if (radio == -1) {
-        fprintf(stderr, "Could not open tty with error %d\n.", radio);
+        fprintf(stderr, "Could not open tty with error %s\n.", strerror(errno));
         exit(EXIT_FAILURE);
     }
 
     /* Set up device using correct UART settings. */
     struct termios tty;
     if (tcgetattr(radio, &tty) != 0) {
-        fprintf(stderr, "Failed to get tty attributes with error %d\n", errno);
+        fprintf(stderr, "Failed to get tty attributes with error %s\n", strerror(errno));
         close(radio);
         exit(EXIT_FAILURE);
     }
@@ -138,19 +138,21 @@ int main(int argc, char **argv) {
     radio_setup_tty(&tty);
 
     if (tcsetattr(radio, TCSANOW, &tty) != 0) {
-        fprintf(stderr, "Failed to set tty attrs with error %d\n", errno);
+        fprintf(stderr, "Failed to set tty attrs with error %s\n", strerror(errno));
         close(radio);
         exit(EXIT_FAILURE);
     }
-    tcflush(radio, TCIFLUSH); // Flush all unread messages from radio
 
     /* Set radio parameters */
     uint8_t count = 0;
-    for (; !radio_set_params(radio, &radio_parameters) && count < RETRY_LIMIT; count++)
-        ;
+    int err;
+    for (; count < RETRY_LIMIT; count++) {
+        err = radio_set_params(radio, &radio_parameters);
+        if (!err) break;
+    }
     if (count == RETRY_LIMIT) {
         close(radio);
-        fprintf(stderr, "Failed to set radio parameters\n");
+        fprintf(stderr, "Failed to set radio parameters: %s\n", strerror(err));
     }
 
     /* Read input stream data line by line. */
@@ -159,6 +161,7 @@ int main(int argc, char **argv) {
         uint8_t transmission_tries = 0;
 
         if (from_q) {
+
             size_t nbytes;
             nbytes = mq_receive(input_q, buffer, BUFFER_SIZE, NULL);
             if (nbytes == (size_t)-1) {
@@ -166,17 +169,31 @@ int main(int argc, char **argv) {
                 // Don't quit, just continue
                 continue;
             }
-            while (transmission_tries < RETRY_LIMIT && !radio_tx_bytes(radio, (uint8_t *)buffer, nbytes))
-                ; // Try 3 times
+
+            for (; transmission_tries < RETRY_LIMIT; transmission_tries++) {
+                err = radio_tx_bytes(radio, (uint8_t *)buffer, nbytes);
+                if (!err) break;
+            }
+
+            if (transmission_tries >= RETRY_LIMIT) {
+                fprintf(stderr, "Failed to transmit after %u tries: %s\n", transmission_tries, strerror(err));
+            }
+
         } else {
+
             // End of input stream triggers program exit
             if (fgets(buffer, BUFFER_SIZE, stdin) == NULL) break;
-            while (transmission_tries < RETRY_LIMIT && !radio_tx(radio, buffer))
-                ; // Try 3 times
+
+            for (; transmission_tries < RETRY_LIMIT; transmission_tries++) {
+                err = radio_tx(radio, buffer);
+                if (!err) break;
+            }
         }
 
         // If transmission fails just log and continue
-        if (transmission_tries >= RETRY_LIMIT) fprintf(stderr, "Failed to transmit %s\n", buffer);
+        if (transmission_tries >= RETRY_LIMIT) {
+            fprintf(stderr, "Failed to transmit after %u tries: %s\n", transmission_tries, strerror(err));
+        }
     }
 
     close(radio);

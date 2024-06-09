@@ -52,22 +52,22 @@ struct lora_params_t {
 };
 
 /* PARAMETER VALIDATION. */
-bool radio_validate_mod(const char *mod, struct lora_params_t *params);
-bool radio_validate_freq(const char *freq, struct lora_params_t *params);
-bool radio_validate_pwr(const char *power, struct lora_params_t *params);
-bool radio_validate_sf(const char *power, struct lora_params_t *params);
-bool radio_validate_cr(const char *coding_rate, struct lora_params_t *params);
-bool radio_validate_prlen(const char *prlen, struct lora_params_t *params);
-bool radio_validate_bw(const char *bandwidth, struct lora_params_t *params);
-bool radio_validate_sync(const char *sync, struct lora_params_t *params);
+int radio_validate_mod(const char *mod, struct lora_params_t *params);
+int radio_validate_freq(const char *freq, struct lora_params_t *params);
+int radio_validate_pwr(const char *power, struct lora_params_t *params);
+int radio_validate_sf(const char *power, struct lora_params_t *params);
+int radio_validate_cr(const char *coding_rate, struct lora_params_t *params);
+int radio_validate_prlen(const char *prlen, struct lora_params_t *params);
+int radio_validate_bw(const char *bandwidth, struct lora_params_t *params);
+int radio_validate_sync(const char *sync, struct lora_params_t *params);
 
 /* RADIO SETUP. */
 void radio_setup_tty(struct termios *tty);
-bool radio_set_params(int radio_fd, const struct lora_params_t *params);
+int radio_set_params(int radio_fd, const struct lora_params_t *params);
 
 /* RADIO COMMUNICATION */
-bool wait_for_ok(int radio_fd);
-bool radio_tx(int radio_fd, const char *data);
-bool radio_tx_bytes(int radio_fd, const uint8_t *data, size_t nbytes);
+int wait_for_ok(int radio_fd);
+int radio_tx(int radio_fd, const char *data);
+int radio_tx_bytes(int radio_fd, const uint8_t *data, size_t nbytes);
 
 #endif // _RADIO_H_
