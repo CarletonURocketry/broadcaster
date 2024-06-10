@@ -9,13 +9,18 @@
 #include <termios.h>
 #include <unistd.h>
 
-/** The read buffer size for incoming data.
+/** The priority above which all messages will be guaranteed to be sent. */
+#define TOP_PRIORITY 3
+
+/**
+ * The read buffer size for incoming data.
  * Since no radio packet can be greater than 512 bytes, and data is provided in ASCII encoding for hex symbols, one byte
- * of data will be one ASCII hex character. So a 512 character buffer is sufficient for all packet sizes. */
-#define BUFFER_SIZE 600
+ * of data will be one ASCII hex character. So a 512 character buffer is sufficient for all packet sizes.
+ */
+#define BUFFER_SIZE 512
 
 /** How many times broadcaster will attempt to transmit a packet before giving up. */
-#define RETRY_LIMIT 3
+#define RETRY_LIMIT 1
 
 /** The name of the message queue to read input from. */
 #define IN_QUEUE "plogger-out"
@@ -156,6 +161,7 @@ int main(int argc, char **argv) {
     }
 
     /* Read input stream data line by line. */
+    unsigned int priority = 0;
     while (1) {
 
         uint8_t transmission_tries = 0;
@@ -163,19 +169,30 @@ int main(int argc, char **argv) {
         if (from_q) {
 
             size_t nbytes;
-            nbytes = mq_receive(input_q, buffer, BUFFER_SIZE, NULL);
+            nbytes = mq_receive(input_q, buffer, BUFFER_SIZE, &priority);
             if (nbytes == (size_t)-1) {
                 fprintf(stderr, "Failed to read from queue: %s\n", strerror(errno));
                 // Don't quit, just continue
                 continue;
             }
 
-            for (; transmission_tries < RETRY_LIMIT; transmission_tries++) {
-                err = radio_tx_bytes(radio, (uint8_t *)buffer, nbytes);
-                if (!err) break;
+            // Top priority messages get infinite retries
+            if (priority >= TOP_PRIORITY) {
+                for (;; transmission_tries++) {
+                    err = radio_tx_bytes(radio, (uint8_t *)buffer, nbytes);
+                    if (!err) break;
+                }
             }
 
-            if (transmission_tries >= RETRY_LIMIT) {
+            // Messages are limited to retry limit
+            else {
+                for (; transmission_tries < RETRY_LIMIT; transmission_tries++) {
+                    err = radio_tx_bytes(radio, (uint8_t *)buffer, nbytes);
+                    if (!err) break;
+                }
+            }
+
+            if (priority < TOP_PRIORITY && transmission_tries >= RETRY_LIMIT) {
                 fprintf(stderr, "Failed to transmit after %u tries: %s\n", transmission_tries, strerror(err));
             }
 
