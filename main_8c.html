@@ -94,9 +94,11 @@ $(function() {
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:a6b20d41d6252e9871430c242cb1a56e7"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="main_8c.html#a6b20d41d6252e9871430c242cb1a56e7">BUFFER_SIZE</a>&#160;&#160;&#160;600</td></tr>
+<tr class="memitem:ae1af1583dad632433850cde64a74f7d8"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="main_8c.html#ae1af1583dad632433850cde64a74f7d8">TOP_PRIORITY</a>&#160;&#160;&#160;3</td></tr>
+<tr class="separator:ae1af1583dad632433850cde64a74f7d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6b20d41d6252e9871430c242cb1a56e7"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="main_8c.html#a6b20d41d6252e9871430c242cb1a56e7">BUFFER_SIZE</a>&#160;&#160;&#160;512</td></tr>
 <tr class="separator:a6b20d41d6252e9871430c242cb1a56e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad4eba3b0ea03f397bae8792d0f0e4cd4"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="main_8c.html#ad4eba3b0ea03f397bae8792d0f0e4cd4">RETRY_LIMIT</a>&#160;&#160;&#160;3</td></tr>
+<tr class="memitem:ad4eba3b0ea03f397bae8792d0f0e4cd4"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="main_8c.html#ad4eba3b0ea03f397bae8792d0f0e4cd4">RETRY_LIMIT</a>&#160;&#160;&#160;1</td></tr>
 <tr class="separator:ad4eba3b0ea03f397bae8792d0f0e4cd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af0411b67a2dba87758fee4f77c888558"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="main_8c.html#af0411b67a2dba87758fee4f77c888558">IN_QUEUE</a>&#160;&#160;&#160;&quot;plogger-out&quot;</td></tr>
 <tr class="separator:af0411b67a2dba87758fee4f77c888558"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -129,7 +131,7 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define BUFFER_SIZE&#160;&#160;&#160;600</td>
+          <td class="memname">#define BUFFER_SIZE&#160;&#160;&#160;512</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -159,11 +161,26 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define RETRY_LIMIT&#160;&#160;&#160;3</td>
+          <td class="memname">#define RETRY_LIMIT&#160;&#160;&#160;1</td>
         </tr>
       </table>
 </div><div class="memdoc">
 <p >How many times broadcaster will attempt to transmit a packet before giving up. </p>
+
+</div>
+</div>
+<a id="ae1af1583dad632433850cde64a74f7d8" name="ae1af1583dad632433850cde64a74f7d8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae1af1583dad632433850cde64a74f7d8">&#9670;&#160;</a></span>TOP_PRIORITY</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define TOP_PRIORITY&#160;&#160;&#160;3</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p >The priority above which all messages will be guaranteed to be sent. </p>
 
 </div>
 </div>
@@ -196,7 +213,7 @@ Variables</h2></td></tr>
 <div class="line">        fprintf(stderr, message, optarg);                                                                              \</div>
 <div class="line">        exit(EXIT_FAILURE);                                                                                            \</div>
 <div class="line">    }</div>
-<div class="ttc" id="amain_8c_html_a44a93d90b9a891dbeaed7ad99f2f7e1d"><div class="ttname"><a href="main_8c.html#a44a93d90b9a891dbeaed7ad99f2f7e1d">radio_parameters</a></div><div class="ttdeci">struct lora_params_t radio_parameters</div><div class="ttdef"><b>Definition:</b> main.c:47</div></div>
+<div class="ttc" id="amain_8c_html_a44a93d90b9a891dbeaed7ad99f2f7e1d"><div class="ttname"><a href="main_8c.html#a44a93d90b9a891dbeaed7ad99f2f7e1d">radio_parameters</a></div><div class="ttdeci">struct lora_params_t radio_parameters</div><div class="ttdef"><b>Definition:</b> main.c:52</div></div>
 </div><!-- fragment --><p >A macro for exiting with a failure when validation fails. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">vfunc</td><td>The validation function, which should take optarg and radio_parameters as parameters. </td></tr>
