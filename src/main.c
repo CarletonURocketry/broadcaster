@@ -149,7 +149,6 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-    puts("HERE");
     /* Set radio parameters */
     uint8_t count = 0;
     int err;
@@ -161,7 +160,6 @@ int main(int argc, char **argv) {
         close(radio);
         log_print(stderr, LOG_ERROR, "Failed to set radio parameters: %s", strerror(err));
     }
-    puts("HERE");
 
     /* Read input stream data line by line. */
     unsigned int priority = 0;
