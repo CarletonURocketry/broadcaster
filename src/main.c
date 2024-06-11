@@ -1,3 +1,4 @@
+#include "../logging-utils/logging.h"
 #include "radio.h"
 #include <errno.h>
 #include <fcntl.h>
@@ -120,7 +121,7 @@ int main(int argc, char **argv) {
     if (from_q) {
         input_q = mq_open(IN_QUEUE, O_RDONLY);
         if (input_q == -1) {
-            fprintf(stderr, "Could not open input message queue %s: %s\n", IN_QUEUE, strerror(errno));
+            log_print(stderr, LOG_ERROR, "Could not open input message queue %s: %s\n", IN_QUEUE, strerror(errno));
             exit(EXIT_FAILURE);
         }
     }
@@ -128,14 +129,14 @@ int main(int argc, char **argv) {
     /* Open radio for reading and writing. */
     int radio = open(serial_port, O_RDWR | O_NDELAY | O_NOCTTY);
     if (radio == -1) {
-        fprintf(stderr, "Could not open tty with error %s\n.", strerror(errno));
+        log_print(stderr, LOG_ERROR, "Could not open tty with error %s\n.", strerror(errno));
         exit(EXIT_FAILURE);
     }
 
     /* Set up device using correct UART settings. */
     struct termios tty;
     if (tcgetattr(radio, &tty) != 0) {
-        fprintf(stderr, "Failed to get tty attributes with error %s\n", strerror(errno));
+        log_print(stderr, LOG_ERROR, "Failed to get tty attributes with error %s\n", strerror(errno));
         close(radio);
         exit(EXIT_FAILURE);
     }
@@ -143,7 +144,7 @@ int main(int argc, char **argv) {
     radio_setup_tty(&tty);
 
     if (tcsetattr(radio, TCSANOW, &tty) != 0) {
-        fprintf(stderr, "Failed to set tty attrs with error %s\n", strerror(errno));
+        log_print(stderr, LOG_ERROR, "Failed to set tty attrs with error %s\n", strerror(errno));
         close(radio);
         exit(EXIT_FAILURE);
     }
@@ -157,7 +158,7 @@ int main(int argc, char **argv) {
     }
     if (count == RETRY_LIMIT) {
         close(radio);
-        fprintf(stderr, "Failed to set radio parameters: %s\n", strerror(err));
+        log_print(stderr, LOG_ERROR, "Failed to set radio parameters: %s\n", strerror(err));
     }
 
     /* Read input stream data line by line. */
@@ -171,7 +172,7 @@ int main(int argc, char **argv) {
             size_t nbytes;
             nbytes = mq_receive(input_q, buffer, BUFFER_SIZE, &priority);
             if (nbytes == (size_t)-1) {
-                fprintf(stderr, "Failed to read from queue: %s\n", strerror(errno));
+                log_print(stderr, LOG_ERROR, "Failed to read from queue: %s\n", strerror(errno));
                 // Don't quit, just continue
                 continue;
             }
@@ -193,7 +194,8 @@ int main(int argc, char **argv) {
             }
 
             if (priority < TOP_PRIORITY && transmission_tries >= RETRY_LIMIT) {
-                fprintf(stderr, "Failed to transmit after %u tries: %s\n", transmission_tries, strerror(err));
+                log_print(stderr, LOG_ERROR, "Failed to transmit after %u tries: %s\n", transmission_tries,
+                          strerror(err));
             }
 
         } else {
@@ -209,7 +211,7 @@ int main(int argc, char **argv) {
 
         // If transmission fails just log and continue
         if (transmission_tries >= RETRY_LIMIT) {
-            fprintf(stderr, "Failed to transmit after %u tries: %s\n", transmission_tries, strerror(err));
+            log_print(stderr, LOG_ERROR, "Failed to transmit after %u tries: %s\n", transmission_tries, strerror(err));
         }
     }
 
