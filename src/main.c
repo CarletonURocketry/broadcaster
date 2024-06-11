@@ -20,7 +20,7 @@
 #define BUFFER_SIZE 512
 
 /** How many times broadcaster will attempt to transmit a packet before giving up. */
-#define RETRY_LIMIT 1
+#define RETRY_LIMIT 3
 
 /** The name of the message queue to read input from. */
 #define IN_QUEUE "plogger-out"
