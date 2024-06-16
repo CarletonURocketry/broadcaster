@@ -23,6 +23,9 @@
 /** How many times broadcaster will attempt to transmit a packet before giving up. */
 #define RETRY_LIMIT 3
 
+/** How many times broadcaster will attempt to transmit a high priority packet before giving up. */
+#define TOP_PRIOR_RETRY_LIMIT 10
+
 /** The name of the message queue to read input from. */
 #define IN_QUEUE "plogger-out"
 
@@ -177,23 +180,13 @@ int main(int argc, char **argv) {
                 continue;
             }
 
-            // Top priority messages get infinite retries
-            if (priority >= TOP_PRIORITY) {
-                for (;; transmission_tries++) {
-                    err = radio_tx_bytes(radio, (uint8_t *)buffer, nbytes);
-                    if (!err) break;
-                }
+            unsigned int retry_limit = priority >= TOP_PRIORITY ? TOP_PRIOR_RETRY_LIMIT : RETRY_LIMIT;
+            for (; transmission_tries < retry_limit; transmission_tries++) {
+                err = radio_tx_bytes(radio, (uint8_t *)buffer, nbytes);
+                if (!err) break;
             }
 
-            // Messages are limited to retry limit
-            else {
-                for (; transmission_tries < RETRY_LIMIT; transmission_tries++) {
-                    err = radio_tx_bytes(radio, (uint8_t *)buffer, nbytes);
-                    if (!err) break;
-                }
-            }
-
-            if (priority < TOP_PRIORITY && transmission_tries >= RETRY_LIMIT) {
+            if (transmission_tries >= retry_limit) {
                 log_print(stderr, LOG_ERROR, "Failed to transmit after %u tries: %s", transmission_tries,
                           strerror(err));
             }
